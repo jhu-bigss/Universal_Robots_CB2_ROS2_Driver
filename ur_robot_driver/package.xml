@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ur_robot_driver</name>
+  <version>0.1.0</version>
+  <description>ROS2 driver for Universal Robots CB2 controllers based on bigss_util.</description>
+
+  <author>Thomas Timm Andersen</author>
+  <author>Simon Rasmussen</author>
+  <author>Felix Exner</author>
+  <author>Lea Steffen</author>
+  <author>Tristan Schnell</author>
+
+  <maintainer email="grosse@fzi.de">Marvin Große Besselmann</maintainer>
+  <maintainer email="lovro.ivanov@gmail.com">Lovro Ivanov</maintainer>
+  <maintainer email="denis.stogl@picknik.ai">Denis Stogl</maintainer>
+  <maintainer email="zelenak@picknik.ai">Andy Zelenak</maintainer>
+  <maintainer email="liushuya7@gmail.com">Joshua Liu</maintainer>
+
+
+  <license>BSD-3-Clause</license>
+
+  <url type="bugtracker">https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/issues</url>
+  <url type="repository">https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <depend>controller_manager</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>launch_testing_ament_cmake</depend>
+  <depend>ur_msgs</depend>
+  <depend>ur_description</depend>
+  <depend>ur_bringup</depend>
+  <depend>ur_controllers</depend>
+  <depend>std_msgs</depend>
+  <depend>controller_manager_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
+</package>

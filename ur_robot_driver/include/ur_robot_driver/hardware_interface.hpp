@@ -56,8 +56,14 @@ public:
   hardware_interface::return_type write() override;
 
 private:
-  std::vector<double> hw_commands_;
-  std::vector<double> hw_states_;
+  std::vector<double> hw_position_commands_;
+  std::vector<double> hw_velocity_commands_;
+  std::vector<double> hw_positions_;
+  std::vector<double> hw_velocities_;
+  std::vector<double> hw_efforts_;
+
+  // rclcpp::Node::SharedPtr node_;
+
 };
 
 }  // namespace ur_robot_driver

@@ -1,6 +1,9 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
+    update_rate: 125  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
 
     joint_state_controller:
       type: joint_state_controller/JointStateController
@@ -17,36 +20,36 @@ controller_manager:
 forward_position_controller:                  # delete entry if controller is not applicable
   ros__parameters:
     joints:
-      - joint1
-      - joint2
-      - joint3
-      - joint4
-      - joint5
-      - joint6
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
     interface_name: position
 
 forward_velocity_controller:                  # delete entry if controller is not applicable
   ros__parameters:
     joints:
-      - joint1
-      - joint2
-      - joint3
-      - joint4
-      - joint5
-      - joint6
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
     interface_name: velocity
 
 joint_trajectory_controller:                  # delete entry if controller is not applicable
   ros__parameters:
     joints:
-      - joint1
-      - joint2
-      - joint3
-      - joint4
-      - joint5
-      - joint6
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
 
-    state_publish_rate: 50.0 # Defaults to 50
+    state_publish_rate: 100.0
     action_monitor_rate: 20.0 # Defaults to 20
 
     allow_partial_joints_goal: false # Defaults to false

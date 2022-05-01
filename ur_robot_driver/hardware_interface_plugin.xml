@@ -1,9 +1,9 @@
-<library path="ur_robot_driver">
+<library path="ur_robot_driver_plugin">
   <class name="ur_robot_driver/URPositionHardwareInterface"
          type="ur_robot_driver::URPositionHardwareInterface"
          base_class_type="hardware_interface::SystemInterface">
     <description>
-      ros2_control hardware interface.
+      ROS2 Control System Driver for Universal Robots CB2 series based on bigss_util.
     </description>
   </class>
 </library>
