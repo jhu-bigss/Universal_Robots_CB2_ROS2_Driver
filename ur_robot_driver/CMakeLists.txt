@@ -25,8 +25,10 @@ find_package(ur_dashboard_msgs REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(controller_manager_msgs REQUIRED)
+find_package(cisst REQUIRED)
 
 include_directories(include)
+include (${CISST_USE_FILE})
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   controller_manager
@@ -47,10 +49,15 @@ add_library(
   src/dashboard_client_ros.cpp
   src/hardware_interface.cpp
   src/urcl_log_handler.cpp
+  src/ur/RobotServer.cpp
 )
 target_link_libraries(
   ur_robot_driver_plugin
   ur_client_library::urcl
+  cisstCommon
+  cisstVector
+  cisstOSAbstraction
+  cisstMultiTask
 )
 target_include_directories(
   ur_robot_driver_plugin
@@ -84,6 +91,8 @@ ament_target_dependencies(ur_ros2_control_node
   hardware_interface
   rclcpp
 )
+
+
 
 install(
   TARGETS dashboard_client ur_ros2_control_node

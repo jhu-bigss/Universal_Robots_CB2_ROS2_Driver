@@ -148,7 +148,15 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
-  // TODO: ADD Implementation
+  // Connect to UR robot server
+  robot_server_ = std::make_unique<RobotServer>();
+  bool rs_is_connected_ = robot_server_->ConnectToUR(robot_ip);
+  if (!rs_is_connected_){
+    RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
+  }
+  else{
+    robot_server_->ProgramFromFile(script_filename);
+  }
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully started!");
 

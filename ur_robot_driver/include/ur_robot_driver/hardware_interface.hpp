@@ -16,14 +16,21 @@
 #ifndef UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
 #define UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
 
+// System
 #include <string>
 #include <vector>
 
+// ros2_control hw
 #include "ur_robot_driver/visibility_control.h"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
+
+// UR stuff
+#include "ur_robot_driver/ur/RobotServer.h"
+
+// ROS
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
@@ -63,6 +70,7 @@ private:
   std::vector<double> hw_efforts_;
 
   // rclcpp::Node::SharedPtr node_;
+  std::unique_ptr<RobotServer> robot_server_;
 
 };
 

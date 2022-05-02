@@ -43,6 +43,7 @@
   <depend>ur_controllers</depend>
   <depend>std_msgs</depend>
   <depend>controller_manager_msgs</depend>
+  <depend>cisst</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
