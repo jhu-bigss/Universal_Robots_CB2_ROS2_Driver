@@ -20,6 +20,8 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(ur_client_library REQUIRED)
+find_package(ur_dashboard_msgs REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(controller_manager_msgs REQUIRED)
@@ -33,6 +35,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_lifecycle
   std_srvs
+  ur_client_library
+  ur_dashboard_msgs
   std_msgs
   controller_manager_msgs
 )
@@ -40,16 +44,21 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 add_library(
   ur_robot_driver_plugin
   SHARED
+  src/dashboard_client_ros.cpp
   src/hardware_interface.cpp
+  src/urcl_log_handler.cpp
+)
+target_link_libraries(
+  ur_robot_driver_plugin
+  ur_client_library::urcl
 )
 target_include_directories(
   ur_robot_driver_plugin
-  PUBLIC
+  PRIVATE
   include
 )
 ament_target_dependencies(
   ur_robot_driver_plugin
-  hardware_interface
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
@@ -59,28 +68,37 @@ target_compile_definitions(ur_robot_driver_plugin PUBLIC "PLUGINLIB__DISABLE_BOO
 pluginlib_export_plugin_description_file(
   hardware_interface hardware_interface_plugin.xml)
 
-install(
-  TARGETS
-  ur_robot_driver_plugin
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
+add_executable(dashboard_client
+  src/dashboard_client_ros.cpp
+  src/dashboard_client_node.cpp
+  src/urcl_log_handler.cpp
+)
+target_link_libraries(dashboard_client ${catkin_LIBRARIES} ur_client_library::urcl)
+ament_target_dependencies(dashboard_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+add_executable(ur_ros2_control_node src/ur_ros2_control_node.cpp)
+target_include_directories(ur_ros2_control_node PUBLIC ${controller_manager_INCLUDE_DIRS})
+target_link_libraries(ur_ros2_control_node ${controller_manager_LIBRARIES})
+ament_target_dependencies(ur_ros2_control_node
+  controller_interface
+  hardware_interface
+  rclcpp
 )
 
+install(
+  TARGETS dashboard_client ur_ros2_control_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# INSTALL
+install(
+  TARGETS ur_robot_driver_plugin
+  DESTINATION lib
+)
 install(
   DIRECTORY include/
   DESTINATION include
 )
-
-
-  # ament_add_gmock(test_hardware_interface test/test_hardware_interface.cpp)
-  # target_include_directories(test_hardware_interface PRIVATE include)
-  # ament_target_dependencies(
-  #   test_hardware_interface
-  #   hardware_interface
-  #   pluginlib
-  #   ros2_control_test_assets
-  # )
 
 ament_export_include_directories(
   include
@@ -95,3 +113,5 @@ ament_export_dependencies(
   rclcpp_lifecycle
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
+
+ament_package()
