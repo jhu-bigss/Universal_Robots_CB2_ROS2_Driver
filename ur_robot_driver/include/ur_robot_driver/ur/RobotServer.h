@@ -22,7 +22,7 @@
  * server program or programs with a similar API.
  */
 
-class RobotServer : public mtsTaskPeriodic
+class RobotServer
 {
 
   CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
@@ -130,9 +130,11 @@ public:
 
   // Move joint to specified position (radians)
   void SetPositionJoint(const vctDoubleVec& joints);
+  void SetPositionJoint(const std::array<double, 6>& joint_pos);
 
   // Move joint at specified velocity (radians/sec)
   void SetVelocityJoint(const vctDoubleVec& joints_vels);
+  void SetVelocityJoint(const std::array<double, 6>& joints_vel);
 
   // Get the current joint velocities (radians/sec)
   void UpdateVelocityJoint(vctDoubleVec& joints_vels) const;

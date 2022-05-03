@@ -11,7 +11,7 @@
 
 #include "ur_robot_driver/ur/URDHKinematics.h"
 
-CMN_IMPLEMENT_SERVICES_DERIVED(RobotServer, mtsTaskPeriodic)
+#include "rclcpp/rclcpp.hpp"
 
 namespace
 {
@@ -63,7 +63,6 @@ std::string ReplaceAll(const std::string& src_str, const std::string& key,
 }  // un-named
 
 RobotServer::RobotServer(const std::string &name, const unsigned short &sp) :
-  mtsTaskPeriodic(name, 10*cmn_ms),
   progSocket(0),
   isConnectedToProg(false),
   host_port(sp),
@@ -84,29 +83,6 @@ RobotServer::RobotServer(const std::string &name, const unsigned short &sp) :
   lastVelocityCommandThresh(1000),
   lastVelocityCommandTime(bigss::time_now_ms())
 {
-  this->StateTable.AddData(this->JointPos, "JointPos");
-  this->StateTable.AddData(this->CartPos, "CartPos");
-  this->StateTable.AddData(this->JointVel, "JointVel");
-  this->StateTable.AddData(this->CartVel, "CartVel");
-  this->StateTable.AddData(this->GeoJacobian, "GeoJacobian");
-
-  mtsInterfaceProvided *provided = AddInterfaceProvided("server");
-  if(provided) {
-    provided->AddCommandWrite(&RobotServer::SendToURClient, this, "SendToURClient");
-    provided->AddCommandWrite(&RobotServer::SetPositionJoint, this, "SetPositionJoint");
-    provided->AddCommandWrite(&RobotServer::SetVelocityJoint, this, "SetVelocityJoint");
-    provided->AddCommandWrite(&RobotServer::SetPositionCartesian, this, "SetPositionCartesian");
-    provided->AddCommandWrite(&RobotServer::SetVelocityCartesian, this, "SetVelocityCartesian");
-    provided->AddCommandWrite(&RobotServer::SetUseHighLevelPDControl, this, "SetUseHighLevelPDControl");
-    provided->AddCommandWrite(&RobotServer::SetPDSpeedPercent, this, "SetPDSpeedPercent");
-    provided->AddCommandWrite(&RobotServer::SetSpeedPercent, this, "SetSpeedPercent");
-    provided->AddCommandVoid(&RobotServer::StopMotion, this, "Stop");
-    provided->AddCommandReadState(this->StateTable, JointPos, "GetPositionJoint");
-    provided->AddCommandReadState(this->StateTable, CartPos, "GetPositionCartesian");
-    provided->AddCommandReadState(this->StateTable, JointVel, "GetVelocityJoint"); 
-    provided->AddCommandReadState(this->StateTable, CartVel, "GetVelocityCartesian"); 
-    provided->AddCommandReadState(this->StateTable, GeoJacobian, "GetGeoJacobian");
-  }
 }
 
 RobotServer::~RobotServer()
@@ -130,16 +106,17 @@ void RobotServer::SetupURProgSocket()
   {
     if (!server.Listen())
     {
-      CMN_LOG_CLASS_INIT_DEBUG << "warning, failed to listen on server port!" << std::endl;
+      RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "failed to listen on server port!");
     }
     else
     {
-      CMN_LOG_CLASS_INIT_DEBUG << "listening on " << host_port << std::endl;
+      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "listening on ");
+
     }
   }
   else
   {
-    CMN_LOG_CLASS_INIT_DEBUG << "warning, failed to assign server port!" << std::endl;
+    RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "failed to assign server port!");
   }
 }
 
@@ -154,9 +131,6 @@ void RobotServer::Startup()
 
 void RobotServer::Run()
 {
-  ProcessQueuedCommands();
-  ProcessQueuedEvents();
-
   // Parse status from the UR
   if (isConnectedToUR)
   {
@@ -189,7 +163,7 @@ void RobotServer::Run()
 
     if (commandingTraj)
     {
-      CMN_LOG_CLASS_RUN_WARNING << "commanding traj" << std::endl;
+      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "commanding traj");
 
       if (CheckTrajUpdate())
       {
@@ -212,11 +186,11 @@ void RobotServer::Run()
 void RobotServer::SendToURClient(const mtsStdString &str)
 {
   if(progSocket == 0) {
-    CMN_LOG_CLASS_RUN_WARNING << "No valid server socket" << std::endl;
+    RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "No valid server socket");
     return;
   }
 
-  CMN_LOG_CLASS_RUN_DEBUG << "Sending message: " << str.Data.c_str() << std::endl;
+  RCLCPP_DEBUG(rclcpp::get_logger("URPositionHardwareInterface"), "Sending message: %s", str.Data.c_str());
 
 #ifdef OSA_SOCKET_WITH_STREAM
   *progSocket << str.c_str();
@@ -237,9 +211,42 @@ void RobotServer::SetPositionJoint(const vctDoubleVec& joints)
   }
 }
 
+void RobotServer::SetPositionJoint(const std::array<double, 6>& joints_pos)
+{
+  // Convert arrary<double, 6> to vctDoubleVec
+  vctDoubleVec joints(6, 0.0);
+  for (int i = 0; i < 6; i++)
+  {
+    joints[i] = joints_pos[i];
+  }
+
+  if (use_high_level_pd_) // this is by default false
+  {
+    SendDoubleVec(PD_JOINT_SPACE, joints);
+  }
+  else
+  {
+    SendDoubleVec(JOINT_POSITION, joints);
+  }
+}
+
 void RobotServer::SetVelocityJoint(const vctDoubleVec& joints_vels)
 {
-  CMN_LOG_CLASS_RUN_DEBUG << "Sending joint velocity: " << joints_vels << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
+  lastVelocityCommandTime = bigss::time_now_ms();
+  lastVelocityCommand = joints_vels;
+  SendDoubleVec(JOINT_VELOCITY, joints_vels);
+}
+
+void RobotServer::SetVelocityJoint(const std::array<double, 6>& joints_vel)
+{
+  vctDoubleVec joints_vels(6, 0.0);
+  for (int i = 0; i < 6; i++)
+  {
+    joints_vels[i] = joints_vel[i];
+  }
+
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
   lastVelocityCommandTime = bigss::time_now_ms();
   lastVelocityCommand = joints_vels;
   SendDoubleVec(JOINT_VELOCITY, joints_vels);
@@ -284,7 +291,7 @@ void RobotServer::UpdatePositionCartesian(vctFrm3& pose) const
 
 void RobotServer::SetVelocityCartesian(const vctDoubleVec& vel)
 {
-  CMN_LOG_CLASS_RUN_DEBUG << "received velocity " << vel << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "received velocity: %d", vel);
   SendDoubleVec(SPATIAL_VELOCITY, vel);
 }
 
@@ -333,7 +340,7 @@ void RobotServer::SendDoubleVec(const unsigned long mode, const vctDoubleVec& v,
 bool RobotServer::ConnectToUR(const std::string& ur_host, unsigned short ur_port)
 {
   isConnectedToUR = urSocket.Connect(ur_host.c_str(), ur_port);
-  CMN_LOG_CLASS_INIT_DEBUG << "Is connected to UR? = " << isConnectedToUR << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Is connected to UR? = %d" , isConnectedToUR);
   return isConnectedToUR;
 }
 
@@ -378,8 +385,7 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
 
   // there must be an additional new line to start the program
   new_str.push_back('\n');
-  CMN_LOG_CLASS_RUN_DEBUG << "Sending UR Program: " << std::endl
-    << new_str << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str);
   urSocket.Send(new_str.c_str(), (unsigned int)new_str.length());
 
   // if we don't care about communicating with the program, return
@@ -391,13 +397,12 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
   do {
     progSocket = server.Accept();
     osaSleep(50.0*cmn_ms);
-    CMN_LOG_CLASS_INIT_DEBUG << "waiting for connection" << std::endl;
+    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "waiting for connection");
     // count ++;
   } while (progSocket == 0 && count < 20);
 
   isConnectedToProg = (progSocket != 0);
-  CMN_LOG_CLASS_INIT_DEBUG << "UR Connection established? = "
-    << isConnectedToProg << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "UR Connection established? = %d", isConnectedToProg);
 }
 
 void RobotServer::GetJointModes(vctInt6 &modes) const
@@ -460,7 +465,7 @@ void RobotServer::SetRobotRunningMode(void)
 void RobotServer::StopMotion(void)
 {
   // stop commanding a trajectory
-  CMN_LOG_CLASS_RUN_DEBUG << "Stopping robot" << std::endl;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Stopping robot");
   commandingTraj = false;
 
   vctDoubleVec joint_acc(1);
@@ -529,7 +534,7 @@ void RobotServer::SetSpeedPercent(const mtsInt &value)
 {
   vctDoubleVec v(1);
   v.SetAll(value/100.0);
-  CMN_LOG_CLASS_RUN_WARNING << "setting speed percent to %" << value << std::endl;
+  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "setting speed percent to %d", value);
   SendDoubleVec(SET_SPEED_PERCENT, v, false);
 }
 

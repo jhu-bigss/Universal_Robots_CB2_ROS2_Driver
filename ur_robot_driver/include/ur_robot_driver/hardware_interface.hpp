@@ -36,11 +36,19 @@
 
 namespace ur_robot_driver
 {
-using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+enum StoppingInterface
+{
+  NONE,
+  STOP_POSITION,
+  STOP_VELOCITY
+};
 
-class URPositionHardwareInterface : public hardware_interface::SystemInterface
+class URPositionHardwareInterface : public hardware_interface::SystemInterface, public RobotServer
 {
 public:
+  URPositionHardwareInterface();
+  ~URPositionHardwareInterface();
+
   TEMPLATES__ROS2_CONTROL__HARDWARE_PUBLIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
 
@@ -62,15 +70,30 @@ public:
   TEMPLATES__ROS2_CONTROL__HARDWARE_PUBLIC
   hardware_interface::return_type write() override;
 
+  hardware_interface::return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
+                                                              const std::vector<std::string>& stop_interfaces) override;
+
+  hardware_interface::return_type perform_command_mode_switch(const std::vector<std::string>& start_interfaces,
+                                                              const std::vector<std::string>& stop_interfaces) override;
+
 private:
-  std::vector<double> hw_position_commands_;
-  std::vector<double> hw_velocity_commands_;
-  std::vector<double> hw_positions_;
-  std::vector<double> hw_velocities_;
-  std::vector<double> hw_efforts_;
+  std::array<double, 6> ur_position_commands_;
+  std::array<double, 6> ur_position_commands_old_;
+  std::array<double, 6> ur_velocity_commands_;
+  std::array<double, 6> ur_positions_;
+  std::array<double, 6> ur_velocities_;
+  std::array<double, 6> ur_efforts_;
+
+  bool controllers_initialized_;
+
+  // resources switching aux vars
+  std::vector<uint> stop_modes_;
+  std::vector<std::string> start_modes_;
+  bool position_controller_running_;
+  bool velocity_controller_running_;
 
   // rclcpp::Node::SharedPtr node_;
-  std::unique_ptr<RobotServer> robot_server_;
+  // std::unique_ptr<RobotServer> robot_server_;
 
 };
 
