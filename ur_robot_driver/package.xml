@@ -34,8 +34,6 @@
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
-  <depend>ur_client_library</depend>
-  <depend>ur_dashboard_msgs</depend>
   <depend>launch_testing_ament_cmake</depend>
   <depend>ur_msgs</depend>
   <depend>ur_description</depend>
