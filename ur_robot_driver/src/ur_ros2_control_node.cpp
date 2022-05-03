@@ -50,9 +50,9 @@ int main(int argc, char** argv)
   rclcpp::init(argc, argv);
 
   // create executor
-  std::shared_ptr<rclcpp::Executor> e = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
+  std::shared_ptr<rclcpp::Executor> executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   // create controller manager instance
-  auto controller_manager = std::make_shared<controller_manager::ControllerManager>(e, "controller_manager");
+  auto controller_manager = std::make_shared<controller_manager::ControllerManager>(executor, "controller_manager");
 
   // control loop thread
   std::thread control_loop([controller_manager]() {
@@ -68,8 +68,8 @@ int main(int argc, char** argv)
   });
 
   // spin the executor with controller manager node
-  e->add_node(controller_manager);
-  e->spin();
+  executor->add_node(controller_manager);
+  executor->spin();
 
   // wait for control loop to finish
   control_loop.join();
