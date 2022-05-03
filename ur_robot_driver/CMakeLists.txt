@@ -37,6 +37,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   std_msgs
   controller_manager_msgs
+  cisst
 )
 
 add_library(
@@ -44,6 +45,9 @@ add_library(
   SHARED
   src/hardware_interface.cpp
   src/ur/RobotServer.cpp
+  src/ur/RobotInterface.cpp
+  src/ur/URDHKinematics.cpp
+  src/ur/bigss_debug_util.cpp
 )
 target_link_libraries(
   ur_robot_driver_plugin
@@ -51,6 +55,7 @@ target_link_libraries(
   cisstVector
   cisstOSAbstraction
   cisstMultiTask
+  cisstParameterTypes
 )
 target_include_directories(
   ur_robot_driver_plugin

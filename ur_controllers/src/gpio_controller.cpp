@@ -108,32 +108,6 @@ controller_interface::InterfaceConfiguration ur_controllers::GPIOController::sta
     config.names.emplace_back("gpio/analog_io_type_" + std::to_string(i));
   }
 
-  // tool
-  config.names.emplace_back("gpio/tool_mode");
-  config.names.emplace_back("gpio/tool_output_voltage");
-  config.names.emplace_back("gpio/tool_output_current");
-  config.names.emplace_back("gpio/tool_temperature");
-
-  for (size_t i = 0; i < 2; ++i) {
-    config.names.emplace_back("gpio/tool_analog_input_" + std::to_string(i));
-  }
-  for (size_t i = 0; i < 2; ++i) {
-    config.names.emplace_back("gpio/tool_analog_input_type_" + std::to_string(i));
-  }
-
-  // robot
-  config.names.emplace_back("gpio/robot_mode");
-  for (size_t i = 0; i < 4; ++i) {
-    config.names.emplace_back("gpio/robot_status_bit_" + std::to_string(i));
-  }
-
-  // safety
-  config.names.emplace_back("gpio/safety_mode");
-  for (size_t i = 0; i < 11; ++i) {
-    config.names.emplace_back("gpio/safety_status_bit_" + std::to_string(i));
-  }
-  config.names.emplace_back("system_interface/initialized");
-
   // program running
   config.names.emplace_back("gpio/program_running");
 
@@ -144,7 +118,6 @@ controller_interface::return_type ur_controllers::GPIOController::update(const r
                                                                          const rclcpp::Duration& /*period*/)
 {
   publishIO();
-  publishToolData();
   publishProgramRunning();
   return controller_interface::return_type::OK;
 }
@@ -185,24 +158,6 @@ void GPIOController::publishIO()
   io_pub_->publish(io_msg_);
 }
 
-void GPIOController::publishToolData()
-{
-  tool_data_msg_.tool_mode = static_cast<uint8_t>(state_interfaces_[StateInterfaces::TOOL_MODE].get_value());
-  tool_data_msg_.analog_input_range2 =
-      static_cast<uint8_t>(state_interfaces_[StateInterfaces::TOOL_ANALOG_IO_TYPES].get_value());
-  tool_data_msg_.analog_input_range3 =
-      static_cast<uint8_t>(state_interfaces_[StateInterfaces::TOOL_ANALOG_IO_TYPES + 1].get_value());
-  tool_data_msg_.analog_input2 = static_cast<float>(state_interfaces_[StateInterfaces::TOOL_ANALOG_INPUTS].get_value());
-  tool_data_msg_.analog_input3 =
-      static_cast<float>(state_interfaces_[StateInterfaces::TOOL_ANALOG_INPUTS + 1].get_value());
-  tool_data_msg_.tool_output_voltage =
-      static_cast<uint8_t>(state_interfaces_[StateInterfaces::TOOL_OUTPUT_VOLTAGE].get_value());
-  tool_data_msg_.tool_current = static_cast<float>(state_interfaces_[StateInterfaces::TOOL_OUTPUT_CURRENT].get_value());
-  tool_data_msg_.tool_temperature =
-      static_cast<float>(state_interfaces_[StateInterfaces::TOOL_TEMPERATURE].get_value());
-  tool_data_pub_->publish(tool_data_msg_);
-}
-
 void GPIOController::publishProgramRunning()
 {
   auto program_running_value = static_cast<uint8_t>(state_interfaces_[StateInterfaces::PROGRAM_RUNNING].get_value());
@@ -224,9 +179,6 @@ ur_controllers::GPIOController::on_activate(const rclcpp_lifecycle::State& /*pre
   try {
     // register publisher
     io_pub_ = get_node()->create_publisher<ur_msgs::msg::IOStates>("~/io_states", rclcpp::SystemDefaultsQoS());
-
-    tool_data_pub_ =
-        get_node()->create_publisher<ur_msgs::msg::ToolDataMsg>("~/tool_data", rclcpp::SystemDefaultsQoS());
 
     auto program_state_pub_qos = rclcpp::SystemDefaultsQoS();
     program_state_pub_qos.transient_local();
@@ -258,7 +210,6 @@ ur_controllers::GPIOController::on_deactivate(const rclcpp_lifecycle::State& /*p
   try {
     // reset publisher
     io_pub_.reset();
-    tool_data_pub_.reset();
     program_state_pub_.reset();
     set_io_srv_.reset();
     set_speed_slider_srv_.reset();

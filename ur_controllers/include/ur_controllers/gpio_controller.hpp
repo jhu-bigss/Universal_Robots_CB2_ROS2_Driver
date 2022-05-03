@@ -47,7 +47,6 @@
 
 #include "controller_interface/controller_interface.hpp"
 #include "ur_msgs/msg/io_states.hpp"
-#include "ur_msgs/msg/tool_data_msg.hpp"
 #include "ur_msgs/srv/set_io.hpp"
 #include "ur_msgs/srv/set_speed_slider_fraction.hpp"
 #include "ur_msgs/srv/set_payload.hpp"
@@ -80,16 +79,6 @@ enum StateInterfaces
   ANALOG_OUTPUTS = 36,
   ANALOG_INPUTS = 38,
   ANALOG_IO_TYPES = 40,
-  TOOL_MODE = 44,
-  TOOL_OUTPUT_VOLTAGE = 45,
-  TOOL_OUTPUT_CURRENT = 46,
-  TOOL_TEMPERATURE = 47,
-  TOOL_ANALOG_INPUTS = 48,
-  TOOL_ANALOG_IO_TYPES = 50,
-  ROBOT_MODE = 52,
-  ROBOT_STATUS_BITS = 53,
-  SAFETY_MODE = 57,
-  SAFETY_STATUS_BITS = 58,
   INITIALIZED_FLAG = 69,
   PROGRAM_RUNNING = 70,
 };
@@ -125,8 +114,6 @@ private:
 
   void publishIO();
 
-  void publishToolData();
-
   void publishProgramRunning();
 
 protected:
@@ -146,11 +133,9 @@ protected:
   rclcpp::Service<ur_msgs::srv::SetPayload>::SharedPtr set_payload_srv_;
 
   std::shared_ptr<rclcpp::Publisher<ur_msgs::msg::IOStates>> io_pub_;
-  std::shared_ptr<rclcpp::Publisher<ur_msgs::msg::ToolDataMsg>> tool_data_pub_;
   std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>> program_state_pub_;
 
   ur_msgs::msg::IOStates io_msg_;
-  ur_msgs::msg::ToolDataMsg tool_data_msg_;
   std_msgs::msg::Bool program_running_msg_;
 
   static constexpr double ASYNC_WAITING = 2.0;

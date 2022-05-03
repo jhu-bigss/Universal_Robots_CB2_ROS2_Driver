@@ -92,9 +92,6 @@ private:
   bool position_controller_running_;
   bool velocity_controller_running_;
 
-  // rclcpp::Node::SharedPtr node_;
-  // std::unique_ptr<RobotServer> robot_server_;
-
 };
 
 }  // namespace ur_robot_driver

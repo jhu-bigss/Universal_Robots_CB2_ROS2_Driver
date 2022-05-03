@@ -232,7 +232,7 @@ void RobotServer::SetPositionJoint(const std::array<double, 6>& joints_pos)
 
 void RobotServer::SetVelocityJoint(const vctDoubleVec& joints_vels)
 {
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
+  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
   lastVelocityCommandTime = bigss::time_now_ms();
   lastVelocityCommand = joints_vels;
   SendDoubleVec(JOINT_VELOCITY, joints_vels);
@@ -246,7 +246,7 @@ void RobotServer::SetVelocityJoint(const std::array<double, 6>& joints_vel)
     joints_vels[i] = joints_vel[i];
   }
 
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
+  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
   lastVelocityCommandTime = bigss::time_now_ms();
   lastVelocityCommand = joints_vels;
   SendDoubleVec(JOINT_VELOCITY, joints_vels);
@@ -291,7 +291,7 @@ void RobotServer::UpdatePositionCartesian(vctFrm3& pose) const
 
 void RobotServer::SetVelocityCartesian(const vctDoubleVec& vel)
 {
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "received velocity: %d", vel);
+  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "received velocity: %d", vel);
   SendDoubleVec(SPATIAL_VELOCITY, vel);
 }
 
@@ -385,7 +385,7 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
 
   // there must be an additional new line to start the program
   new_str.push_back('\n');
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str);
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str.c_str());
   urSocket.Send(new_str.c_str(), (unsigned int)new_str.length());
 
   // if we don't care about communicating with the program, return
@@ -534,7 +534,7 @@ void RobotServer::SetSpeedPercent(const mtsInt &value)
 {
   vctDoubleVec v(1);
   v.SetAll(value/100.0);
-  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "setting speed percent to %d", value);
+  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "setting speed percent to %s", value.ToString().c_str());
   SendDoubleVec(SET_SPEED_PERCENT, v, false);
 }
 

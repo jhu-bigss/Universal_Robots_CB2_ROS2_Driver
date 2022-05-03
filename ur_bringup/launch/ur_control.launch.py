@@ -157,26 +157,6 @@ def launch_setup(context, *args, **kwargs):
         condition=UnlessCondition(use_fake_hardware),
     )
 
-    controller_stopper_node = Node(
-        package="ur_robot_driver",
-        executable="controller_stopper_node",
-        name="controller_stopper",
-        output="screen",
-        emulate_tty=True,
-        condition=UnlessCondition(use_fake_hardware),
-        parameters=[
-            {"headless_mode": headless_mode},
-            {"joint_controller_active": activate_joint_controller},
-            {
-                "consistent_controllers": [
-                    "io_and_status_controller",
-                    "joint_state_broadcaster",
-                    "speed_scaling_state_broadcaster",
-                ]
-            },
-        ],
-    )
-
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -238,7 +218,6 @@ def launch_setup(context, *args, **kwargs):
     nodes_to_start = [
         control_node,
         ur_control_node,
-        controller_stopper_node,
         robot_state_publisher_node,
         rviz_node,
         joint_state_broadcaster_spawner,

@@ -24,6 +24,14 @@
 
 namespace ur_robot_driver
 {
+//  URPositionHardwareInterface::URPositionHardwareInterface(){}
+
+//  URPositionHardwareInterface::~URPositionHardwareInterface() {
+//     RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Disconnecting UR destruct...");
+//     // TODO: Clean up
+//     RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Done.");
+// } 
+
 CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::HardwareInfo & info)
 {
   if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {

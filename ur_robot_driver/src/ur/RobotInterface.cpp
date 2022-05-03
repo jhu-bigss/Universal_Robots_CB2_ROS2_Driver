@@ -1,6 +1,6 @@
 /*! \file robotInterface.cpp */
 
-#include "RobotInterface.h"
+#include "ur_robot_driver/ur/RobotInterface.h"
 
 #include <cstring>
 #include <cisstOSAbstraction/osaSocket.h>
