@@ -1,9 +1,6 @@
 #ifndef ROBOT_SERVER_H
 #define ROBOT_SERVER_H
 
-//BTX
-
-#include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstOSAbstraction/osaSocketServer.h>
 
 #include <cisstParameterTypes/prmPositionJointGet.h>
@@ -114,13 +111,7 @@ public:
   RobotServer(const std::string &name = "RobotServer", const unsigned short &sp=50000);
   ~RobotServer();
 
-
   void AssignServerPort(const unsigned short port);
-
-  virtual void Configure(const std::string &CMN_UNUSED(filename) = "") {};
-  virtual void Startup(void);
-  virtual void Cleanup(void) {};
-  virtual void Run(void);
 
   /// Set the UR type.
   /// \param isUR5 If true, this is UR5 [default]. Otherwise, UR10
@@ -215,10 +206,6 @@ private:
   static void ConvertFrm3ToURPose(const vctFrm3 vct_pose, vctDoubleVec& ur_pose);
 
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION(RobotServer)
-
-//ETX
 
 #endif // ROBOT_SERVER_H
 

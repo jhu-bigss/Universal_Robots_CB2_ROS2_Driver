@@ -3,7 +3,6 @@
 #include <cstdlib>
 
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstParameterTypes/prmRobotState.h>
 #include <cisstVector.h>
 
@@ -125,63 +124,63 @@ void RobotServer::AssignServerPort(const unsigned short port)
   this->host_port = port;
 }
 
-void RobotServer::Startup()
-{
-}
+// void RobotServer::Startup()
+// {
+// }
 
-void RobotServer::Run()
-{
-  // Parse status from the UR
-  if (isConnectedToUR)
-  {
-    // update the state using the default state updates the UR gives over
-    // the specified UR socket
-    ur_interface.readFromSocket(urSocket);
+// void RobotServer::Run()
+// {
+//   // Parse status from the UR
+//   if (isConnectedToUR)
+//   {
+//     // update the state using the default state updates the UR gives over
+//     // the specified UR socket
+//     ur_interface.readFromSocket(urSocket);
 
-    //ur_interface.saveDH();
-    //for(int i=0; i<6; i++) {
-    //  std::cout << "a: " << ur_interface.a[i];
-    //  std::cout << " alpha: " << ur_interface.alpha[i];
-    //  std::cout << " d: " << ur_interface.d[i] << std::endl;
-    //}
+//     //ur_interface.saveDH();
+//     //for(int i=0; i<6; i++) {
+//     //  std::cout << "a: " << ur_interface.a[i];
+//     //  std::cout << " alpha: " << ur_interface.alpha[i];
+//     //  std::cout << " d: " << ur_interface.d[i] << std::endl;
+//     //}
 
-    this->JointPos.Position() = vctDoubleVec(ur_interface.cur_joints());
-    this->UpdatePositionCartesian(this->CartPos.Position());
-    this->JointVel.Velocity() = vctDoubleVec(ur_interface.cur_joint_velocity());
-    this->GeoJacobian = ur_interface.getGeoJacobian();
-    // this->UpdateVelocityCartesian(this->CartVel.Velocity());
+//     this->JointPos.Position() = vctDoubleVec(ur_interface.cur_joints());
+//     this->UpdatePositionCartesian(this->CartPos.Position());
+//     this->JointVel.Velocity() = vctDoubleVec(ur_interface.cur_joint_velocity());
+//     this->GeoJacobian = ur_interface.getGeoJacobian();
+//     // this->UpdateVelocityCartesian(this->CartVel.Velocity());
 
-    if (velocityTimeLimit)
-    {
-      if(lastVelocityCommand.Norm() > 0.0001
-       && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
-      {
-        StopMotion();
-        lastVelocityCommand.SetAll(0.0);
-      }
-    }
+//     if (velocityTimeLimit)
+//     {
+//       if(lastVelocityCommand.Norm() > 0.0001
+//        && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
+//       {
+//         StopMotion();
+//         lastVelocityCommand.SetAll(0.0);
+//       }
+//     }
 
-    if (commandingTraj)
-    {
-      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "commanding traj");
+//     if (commandingTraj)
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "commanding traj");
 
-      if (CheckTrajUpdate())
-      {
-        std::cout << "updating traj id" << std::endl;
-        trajID ++;
-      }
+//       if (CheckTrajUpdate())
+//       {
+//         std::cout << "updating traj id" << std::endl;
+//         trajID ++;
+//       }
 
-      // if reached end of trajectory, stop the motion
-      if (trajID >= jointTraj.cols())
-      {
-        commandingTraj = false;
-        StopMotion();
-      }
-      else
-        StepTraj ();
-    }
-  }
-}
+//       // if reached end of trajectory, stop the motion
+//       if (trajID >= jointTraj.cols())
+//       {
+//         commandingTraj = false;
+//         StopMotion();
+//       }
+//       else
+//         StepTraj ();
+//     }
+//   }
+// }
 
 void RobotServer::SendToURClient(const mtsStdString &str)
 {
