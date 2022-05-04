@@ -4,7 +4,7 @@ ROS 2 node for Universal Robot CB2 Controller (https://github.com/jhu-bigss/Univ
 
 You can use the ROS 2 VCS python-based tool (`sudo apt install python3-vcstool`) to download this package and its specific dependencies. Look for the `.repos` file in this repository and find the link to the raw content. Then in your ROS 2 workspace, under the `src` directory, use:
 ```bash
-vcs import --input https://raw.githubusercontent.com/jhu-bigss/Universal_Robots_CB2_ROS2_Driver/bigss_util_v2/ur_bigss_util.repos
+vcs import --input https://raw.githubusercontent.com/jhu-bigss/Universal_Robots_CB2_ROS2_Driver/bigss_util_v2/ur_cb2_driver.repos
 ```
 Then go back to the root of your ROS 2 workspace and build using:
 ```bash
