@@ -1,8 +1,8 @@
 repositories:
-  ur_cb2_driver:
+  Universal_Robots_CB2_ROS2_Driver:
     type: git
     url: git@github.com:jhu-bigss/Universal_Robots_CB2_ROS2_Driver.git
-    version: bigss_util_v2
+    version: main
   cisst:
     type: git
     url: git@github.com:jhu-cisst/cisst
