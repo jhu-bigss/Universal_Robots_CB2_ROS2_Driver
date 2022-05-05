@@ -36,6 +36,23 @@
 
 namespace ur_robot_driver
 {
+enum class RuntimeState
+{
+  STOPPING,
+  STOPPED,
+  PLAYING,
+  PAUSING,
+  PAUSED,
+  RESUMING
+};
+
+enum class PausingState
+{
+  PAUSED,
+  RUNNING,
+  RAMPUP
+};
+
 enum StoppingInterface
 {
   NONE,
@@ -43,6 +60,11 @@ enum StoppingInterface
   STOP_VELOCITY
 };
 
+/*!
+ * \brief The HardwareInterface class handles the interface between the ROS system and the main
+ * driver. It contains the read and write methods of the main control loop and registers various ROS
+ * topics and services.
+ */
 class URPositionHardwareInterface : public hardware_interface::SystemInterface, public RobotServer
 {
 public:
@@ -84,7 +106,14 @@ private:
   std::array<double, 6> ur_velocities_;
   std::array<double, 6> ur_efforts_;
 
+  RuntimeState runtime_state_;
+  PausingState pausing_state_;
+  double pausing_ramp_up_increment_;
   bool controllers_initialized_;
+
+  double speed_scaling_;
+  double target_speed_fraction_;
+  double speed_scaling_combined_;
 
   // resources switching aux vars
   std::vector<uint> stop_modes_;
