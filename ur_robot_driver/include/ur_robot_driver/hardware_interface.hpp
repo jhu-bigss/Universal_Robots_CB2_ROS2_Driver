@@ -19,6 +19,7 @@
 // System
 #include <string>
 #include <vector>
+#include <thread>
 
 // ros2_control hw
 #include "ur_robot_driver/visibility_control.h"
@@ -98,7 +99,13 @@ public:
   hardware_interface::return_type perform_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                                               const std::vector<std::string>& stop_interfaces) override;
 
-private:
+  static constexpr double NO_NEW_CMD_ = std::numeric_limits<double>::quiet_NaN();
+
+  void asyncThread();
+
+protected:
+  void initAsyncIO();
+
   std::array<double, 6> ur_position_commands_;
   std::array<double, 6> ur_position_commands_old_;
   std::array<double, 6> ur_velocity_commands_;
@@ -106,6 +113,7 @@ private:
   std::array<double, 6> ur_velocities_;
   std::array<double, 6> ur_efforts_;
 
+  // robot states
   RuntimeState runtime_state_;
   PausingState pausing_state_;
   double pausing_ramp_up_increment_;
@@ -114,6 +122,25 @@ private:
   double speed_scaling_;
   double target_speed_fraction_;
   double speed_scaling_combined_;
+
+  // asynchronous commands
+  double io_async_success_;
+  double target_speed_fraction_cmd_;
+  double scaling_async_success_;
+  double resend_robot_program_cmd_;
+  double resend_robot_program_async_success_;
+  bool first_pass_;
+  bool initialized_;
+  double system_interface_initialized_;
+  bool async_thread_shutdown_;
+  std::shared_ptr<std::thread> async_thread_;
+
+  std::array<double, 18> standard_dig_out_bits_cmd_;
+  std::array<double, 18> actual_dig_out_bits_copy_;
+  std::array<double, 18> actual_dig_in_bits_copy_;
+  std::array<double, 2> standard_analog_input_;
+  std::array<double, 2> standard_analog_output_;
+  std::array<double, 2> standard_analog_output_cmd_;
 
   // resources switching aux vars
   std::vector<uint> stop_modes_;

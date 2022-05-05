@@ -49,7 +49,6 @@
 #include "ur_msgs/msg/io_states.hpp"
 #include "ur_msgs/srv/set_io.hpp"
 #include "ur_msgs/srv/set_speed_slider_fraction.hpp"
-#include "ur_msgs/srv/set_payload.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/duration.hpp"
 #include "std_msgs/msg/bool.hpp"
@@ -65,11 +64,6 @@ enum CommandInterfaces
   TARGET_SPEED_FRACTION_ASYNC_SUCCESS = 22,
   RESEND_ROBOT_PROGRAM_CMD = 23,
   RESEND_ROBOT_PROGRAM_ASYNC_SUCCESS = 24,
-  PAYLOAD_MASS = 25,
-  PAYLOAD_COG_X = 26,
-  PAYLOAD_COG_Y = 27,
-  PAYLOAD_COG_Z = 28,
-  PAYLOAD_ASYNC_SUCCESS = 29,
 };
 
 enum StateInterfaces
@@ -78,9 +72,7 @@ enum StateInterfaces
   DIGITAL_INPUTS = 18,
   ANALOG_OUTPUTS = 36,
   ANALOG_INPUTS = 38,
-  ANALOG_IO_TYPES = 40,
   INITIALIZED_FLAG = 69,
-  PROGRAM_RUNNING = 70,
 };
 
 class GPIOController : public controller_interface::ControllerInterface
@@ -109,12 +101,7 @@ private:
   bool resendRobotProgram(std_srvs::srv::Trigger::Request::SharedPtr req,
                           std_srvs::srv::Trigger::Response::SharedPtr resp);
 
-  bool setPayload(const ur_msgs::srv::SetPayload::Request::SharedPtr req,
-                  ur_msgs::srv::SetPayload::Response::SharedPtr resp);
-
   void publishIO();
-
-  void publishProgramRunning();
 
 protected:
   void initMsgs();
@@ -130,18 +117,15 @@ protected:
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr resend_robot_program_srv_;
   rclcpp::Service<ur_msgs::srv::SetSpeedSliderFraction>::SharedPtr set_speed_slider_srv_;
   rclcpp::Service<ur_msgs::srv::SetIO>::SharedPtr set_io_srv_;
-  rclcpp::Service<ur_msgs::srv::SetPayload>::SharedPtr set_payload_srv_;
 
   std::shared_ptr<rclcpp::Publisher<ur_msgs::msg::IOStates>> io_pub_;
-  std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool>> program_state_pub_;
 
   ur_msgs::msg::IOStates io_msg_;
-  std_msgs::msg::Bool program_running_msg_;
 
   static constexpr double ASYNC_WAITING = 2.0;
   // TODO(anyone) publishers to add: tcp_pose_pub_
   // TODO(anyone) subscribers to add: script_command_sub_
-  // TODO(anyone) service servers to add: resend_robot_program_srv_, deactivate_srv_, set_payload_srv_, tare_sensor_srv_
+  // TODO(anyone) service servers to add: resend_robot_program_srv_, deactivate_srv_, tare_sensor_srv_
 };
 }  // namespace ur_controllers
 

@@ -71,13 +71,6 @@ controller_interface::InterfaceConfiguration GPIOController::command_interface_c
 
   config.names.emplace_back("resend_robot_program/resend_robot_program_async_success");
 
-  // payload stuff
-  config.names.emplace_back("payload/mass");
-  config.names.emplace_back("payload/cog.x");
-  config.names.emplace_back("payload/cog.y");
-  config.names.emplace_back("payload/cog.z");
-  config.names.emplace_back("payload/payload_async_success");
-
   return config;
 }
 
@@ -104,13 +97,6 @@ controller_interface::InterfaceConfiguration ur_controllers::GPIOController::sta
     config.names.emplace_back("gpio/standard_analog_input_" + std::to_string(i));
   }
 
-  for (size_t i = 0; i < 4; ++i) {
-    config.names.emplace_back("gpio/analog_io_type_" + std::to_string(i));
-  }
-
-  // program running
-  config.names.emplace_back("gpio/program_running");
-
   return config;
 }
 
@@ -118,7 +104,6 @@ controller_interface::return_type ur_controllers::GPIOController::update(const r
                                                                          const rclcpp::Duration& /*period*/)
 {
   publishIO();
-  publishProgramRunning();
   return controller_interface::return_type::OK;
 }
 
@@ -143,29 +128,15 @@ void GPIOController::publishIO()
     io_msg_.analog_in_states[i].pin = i;
     io_msg_.analog_in_states[i].state =
         static_cast<float>(state_interfaces_[i + StateInterfaces::ANALOG_INPUTS].get_value());
-    io_msg_.analog_in_states[i].domain =
-        static_cast<uint8_t>(state_interfaces_[i + StateInterfaces::ANALOG_IO_TYPES].get_value());
   }
 
   for (size_t i = 0; i < 2; ++i) {
     io_msg_.analog_out_states[i].pin = i;
     io_msg_.analog_out_states[i].state =
         static_cast<float>(state_interfaces_[i + StateInterfaces::ANALOG_OUTPUTS].get_value());
-    io_msg_.analog_out_states[i].domain =
-        static_cast<uint8_t>(state_interfaces_[i + StateInterfaces::ANALOG_IO_TYPES + 2].get_value());
   }
 
   io_pub_->publish(io_msg_);
-}
-
-void GPIOController::publishProgramRunning()
-{
-  auto program_running_value = static_cast<uint8_t>(state_interfaces_[StateInterfaces::PROGRAM_RUNNING].get_value());
-  bool program_running = program_running_value == 1.0 ? true : false;
-  if (program_running_msg_.data != program_running) {
-    program_running_msg_.data = program_running;
-    program_state_pub_->publish(program_running_msg_);
-  }
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -180,11 +151,6 @@ ur_controllers::GPIOController::on_activate(const rclcpp_lifecycle::State& /*pre
     // register publisher
     io_pub_ = get_node()->create_publisher<ur_msgs::msg::IOStates>("~/io_states", rclcpp::SystemDefaultsQoS());
 
-    auto program_state_pub_qos = rclcpp::SystemDefaultsQoS();
-    program_state_pub_qos.transient_local();
-    program_state_pub_ =
-        get_node()->create_publisher<std_msgs::msg::Bool>("~/robot_program_running", program_state_pub_qos);
-
     set_io_srv_ = get_node()->create_service<ur_msgs::srv::SetIO>(
         "~/set_io", std::bind(&GPIOController::setIO, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -195,9 +161,6 @@ ur_controllers::GPIOController::on_activate(const rclcpp_lifecycle::State& /*pre
     resend_robot_program_srv_ = get_node()->create_service<std_srvs::srv::Trigger>(
         "~/resend_robot_program",
         std::bind(&GPIOController::resendRobotProgram, this, std::placeholders::_1, std::placeholders::_2));
-
-    set_payload_srv_ = get_node()->create_service<ur_msgs::srv::SetPayload>(
-        "~/set_payload", std::bind(&GPIOController::setPayload, this, std::placeholders::_1, std::placeholders::_2));
   } catch (...) {
     return LifecycleNodeInterface::CallbackReturn::ERROR;
   }
@@ -210,7 +173,6 @@ ur_controllers::GPIOController::on_deactivate(const rclcpp_lifecycle::State& /*p
   try {
     // reset publisher
     io_pub_.reset();
-    program_state_pub_.reset();
     set_io_srv_.reset();
     set_speed_slider_srv_.reset();
   } catch (...) {
@@ -300,34 +262,6 @@ bool GPIOController::resendRobotProgram(std_srvs::srv::Trigger::Request::SharedP
     RCLCPP_INFO(node_->get_logger(), "Successfully resent robot program");
   } else {
     RCLCPP_ERROR(node_->get_logger(), "Could not resend robot program");
-    return false;
-  }
-
-  return true;
-}
-
-bool GPIOController::setPayload(const ur_msgs::srv::SetPayload::Request::SharedPtr req,
-                                ur_msgs::srv::SetPayload::Response::SharedPtr resp)
-{
-  // reset success flag
-  command_interfaces_[CommandInterfaces::PAYLOAD_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
-
-  command_interfaces_[CommandInterfaces::PAYLOAD_MASS].set_value(req->mass);
-  command_interfaces_[CommandInterfaces::PAYLOAD_COG_X].set_value(req->center_of_gravity.x);
-  command_interfaces_[CommandInterfaces::PAYLOAD_COG_Y].set_value(req->center_of_gravity.y);
-  command_interfaces_[CommandInterfaces::PAYLOAD_COG_Z].set_value(req->center_of_gravity.z);
-
-  while (command_interfaces_[CommandInterfaces::PAYLOAD_ASYNC_SUCCESS].get_value() == ASYNC_WAITING) {
-    // Asynchronous wait until the hardware interface has set the payload
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  }
-
-  resp->success = static_cast<bool>(command_interfaces_[CommandInterfaces::PAYLOAD_ASYNC_SUCCESS].get_value());
-
-  if (resp->success) {
-    RCLCPP_INFO(node_->get_logger(), "Payload has been set successfully");
-  } else {
-    RCLCPP_ERROR(node_->get_logger(), "Could not set the payload");
     return false;
   }
 

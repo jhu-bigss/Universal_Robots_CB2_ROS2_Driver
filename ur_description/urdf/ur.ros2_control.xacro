@@ -215,21 +215,6 @@
 
           <state_interface name="standard_analog_input_0"/>
           <state_interface name="standard_analog_input_1"/>
-
-          <state_interface name="analog_io_type_0"/>
-          <state_interface name="analog_io_type_1"/>
-          <state_interface name="analog_io_type_2"/>
-          <state_interface name="analog_io_type_3"/>
-
-          <state_interface name="program_running"/>
-        </gpio>
-
-        <gpio name="payload">
-          <command_interface name="mass"/>
-          <command_interface name="cog.x"/>
-          <command_interface name="cog.y"/>
-          <command_interface name="cog.z"/>
-          <command_interface name="payload_async_success"/>
         </gpio>
 
         <gpio name="resend_robot_program">
