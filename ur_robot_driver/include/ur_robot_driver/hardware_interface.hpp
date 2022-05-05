@@ -46,8 +46,8 @@ enum StoppingInterface
 class URPositionHardwareInterface : public hardware_interface::SystemInterface, public RobotServer
 {
 public:
-  URPositionHardwareInterface();
-  ~URPositionHardwareInterface();
+  // URPositionHardwareInterface();
+  // ~URPositionHardwareInterface();
 
   TEMPLATES__ROS2_CONTROL__HARDWARE_PUBLIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;

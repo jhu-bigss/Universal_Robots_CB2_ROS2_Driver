@@ -35,7 +35,7 @@ std::string GetLocalhostIP()
   }
 
   // return ip_str;
-  return "192.168.2.3";
+  return "192.168.36.1";
 }
 
 // Replace all instances of key in a src_str with a val string and return the
@@ -384,7 +384,8 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
 
   // there must be an additional new line to start the program
   new_str.push_back('\n');
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program...");
+  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str.c_str());
   urSocket.Send(new_str.c_str(), (unsigned int)new_str.length());
 
   // if we don't care about communicating with the program, return

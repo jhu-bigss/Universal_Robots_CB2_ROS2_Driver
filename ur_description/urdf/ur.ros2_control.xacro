@@ -139,15 +139,6 @@
       </joint>
 
       <xacro:unless value="${sim_gazebo or sim_ignition}">
-        <sensor name="tcp_fts_sensor">
-          <state_interface name="force.x"/>
-          <state_interface name="force.y"/>
-          <state_interface name="force.z"/>
-          <state_interface name="torque.x"/>
-          <state_interface name="torque.y"/>
-          <state_interface name="torque.z"/>
-        </sensor>
-
         <!-- NOTE The following are joints used only for testing with fake hardware and will change in the future -->
         <gpio name="speed_scaling">
           <state_interface name="speed_scaling_factor"/>

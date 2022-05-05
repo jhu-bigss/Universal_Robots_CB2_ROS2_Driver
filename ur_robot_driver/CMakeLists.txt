@@ -98,6 +98,10 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+install(
+  DIRECTORY ur_scripts/
+  DESTINATION share/${PROJECT_NAME}/ur_scripts
+)
 
 ament_export_include_directories(
   include

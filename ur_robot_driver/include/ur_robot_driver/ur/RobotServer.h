@@ -21,9 +21,6 @@
 
 class RobotServer
 {
-
-  CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
-
   // attributes
 protected:
 
