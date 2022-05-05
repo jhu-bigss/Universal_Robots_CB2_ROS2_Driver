@@ -179,12 +179,6 @@ def launch_setup(context, *args, **kwargs):
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
     )
 
-    io_and_status_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["io_and_status_controller", "-c", "/controller_manager"],
-    )
-
     speed_scaling_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -221,7 +215,6 @@ def launch_setup(context, *args, **kwargs):
         robot_state_publisher_node,
         rviz_node,
         joint_state_broadcaster_spawner,
-        io_and_status_controller_spawner,
         speed_scaling_state_broadcaster_spawner,
         forward_position_controller_spawner_stopped,
         initial_joint_controller_spawner_stopped,

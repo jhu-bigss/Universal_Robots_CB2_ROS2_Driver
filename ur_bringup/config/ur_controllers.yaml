@@ -17,9 +17,6 @@ controller_manager:
     joint_trajectory_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
-    io_and_status_controller:
-      type: ur_controllers/GPIOController
-
     scaled_joint_trajectory_controller:
       type: ur_controllers/ScaledJointTrajectoryController
 

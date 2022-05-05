@@ -45,8 +45,7 @@ include_directories(include)
 
 add_library(${PROJECT_NAME} SHARED
   src/scaled_joint_trajectory_controller.cpp
-  src/speed_scaling_state_broadcaster.cpp
-  src/gpio_controller.cpp)
+  src/speed_scaling_state_broadcaster.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   include

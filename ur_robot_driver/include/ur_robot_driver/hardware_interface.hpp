@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <bitset>
 
 // ros2_control hw
 #include "ur_robot_driver/visibility_control.h"
@@ -101,11 +102,7 @@ public:
 
   static constexpr double NO_NEW_CMD_ = std::numeric_limits<double>::quiet_NaN();
 
-  void asyncThread();
-
 protected:
-  void initAsyncIO();
-
   std::array<double, 6> ur_position_commands_;
   std::array<double, 6> ur_position_commands_old_;
   std::array<double, 6> ur_velocity_commands_;
@@ -124,7 +121,6 @@ protected:
   double speed_scaling_combined_;
 
   // asynchronous commands
-  double io_async_success_;
   double target_speed_fraction_cmd_;
   double scaling_async_success_;
   double resend_robot_program_cmd_;
@@ -132,22 +128,12 @@ protected:
   bool first_pass_;
   bool initialized_;
   double system_interface_initialized_;
-  bool async_thread_shutdown_;
-  std::shared_ptr<std::thread> async_thread_;
-
-  std::array<double, 18> standard_dig_out_bits_cmd_;
-  std::array<double, 18> actual_dig_out_bits_copy_;
-  std::array<double, 18> actual_dig_in_bits_copy_;
-  std::array<double, 2> standard_analog_input_;
-  std::array<double, 2> standard_analog_output_;
-  std::array<double, 2> standard_analog_output_cmd_;
 
   // resources switching aux vars
   std::vector<uint> stop_modes_;
   std::vector<std::string> start_modes_;
   bool position_controller_running_;
   bool velocity_controller_running_;
-
 };
 
 }  // namespace ur_robot_driver

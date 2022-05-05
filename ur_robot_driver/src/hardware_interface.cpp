@@ -50,7 +50,6 @@ CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::Ha
   controllers_initialized_ = false;
   first_pass_ = true;
   initialized_ = false;
-  async_thread_shutdown_ = false;
   system_interface_initialized_ = 0.0;
 
   for (const hardware_interface::ComponentInfo& joint : info_.joints) {
@@ -124,21 +123,6 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
   state_interfaces.emplace_back(
       hardware_interface::StateInterface("speed_scaling", "speed_scaling_factor", &speed_scaling_combined_));
 
-  for (size_t i = 0; i < 18; ++i) {
-    state_interfaces.emplace_back(hardware_interface::StateInterface("gpio", "digital_output_" + std::to_string(i),
-                                                                     &actual_dig_out_bits_copy_[i]));
-    state_interfaces.emplace_back(
-        hardware_interface::StateInterface("gpio", "digital_input_" + std::to_string(i), &actual_dig_in_bits_copy_[i]));
-  }
-
-  for (size_t i = 0; i < 2; ++i) {
-    state_interfaces.emplace_back(hardware_interface::StateInterface(
-        "gpio", "standard_analog_input_" + std::to_string(i), &standard_analog_input_[i]));
-
-    state_interfaces.emplace_back(hardware_interface::StateInterface(
-        "gpio", "standard_analog_output_" + std::to_string(i), &standard_analog_output_[i]));
-  }
-
   state_interfaces.emplace_back(
       hardware_interface::StateInterface("system_interface", "initialized", &system_interface_initialized_));
 
@@ -157,8 +141,6 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
       info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &ur_velocity_commands_[i]));
   }
 
-  command_interfaces.emplace_back(hardware_interface::CommandInterface("gpio", "io_async_success", &io_async_success_));
-
   command_interfaces.emplace_back(
       hardware_interface::CommandInterface("speed_scaling", "target_speed_fraction_cmd", &target_speed_fraction_cmd_));
 
@@ -170,16 +152,6 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
 
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
       "resend_robot_program", "resend_robot_program_async_success", &resend_robot_program_async_success_));
-
-  for (size_t i = 0; i < 18; ++i) {
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        "gpio", "standard_digital_output_cmd_" + std::to_string(i), &standard_dig_out_bits_cmd_[i]));
-  }
-
-  for (size_t i = 0; i < 2; ++i) {
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        "gpio", "standard_analog_output_cmd_" + std::to_string(i), &standard_analog_output_cmd_[i]));
-  }
 
   return command_interfaces;
 }
@@ -213,8 +185,6 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
     this->ProgramFromFile(script_filename);
   }
 
-  async_thread_ = std::make_shared<std::thread>(&URPositionHardwareInterface::asyncThread, this);
-
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully started!");
 
   return CallbackReturn::SUCCESS;
@@ -224,25 +194,13 @@ CallbackReturn URPositionHardwareInterface::on_deactivate(const rclcpp_lifecycle
 {
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Stopping ...please wait...");
 
-  async_thread_shutdown_ = true;
-  async_thread_->join();
-  async_thread_.reset();
+  // Anything to clean up?
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully stopped!");
 
   return CallbackReturn::SUCCESS;
 }
 
-void URPositionHardwareInterface::asyncThread()
-{
-  while (!async_thread_shutdown_) {
-    if (initialized_) {
-      // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initialized in async thread");
-      // TODO: checkAsyncIO();
-    }
-    std::this_thread::sleep_for(std::chrono::nanoseconds(20000000));
-  }
-}
 
 hardware_interface::return_type URPositionHardwareInterface::read()
 {
@@ -293,7 +251,6 @@ hardware_interface::return_type URPositionHardwareInterface::read()
 
   if (first_pass_ && !initialized_)
   {
-    initAsyncIO();
     // initialize commands
     ur_position_commands_ = ur_position_commands_old_ = ur_positions_;
     ur_velocity_commands_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
@@ -332,19 +289,6 @@ hardware_interface::return_type URPositionHardwareInterface::write()
   }
 
   return hardware_interface::return_type::OK;
-}
-
-void URPositionHardwareInterface::initAsyncIO()
-{
-  for (size_t i = 0; i < 18; ++i) {
-    standard_dig_out_bits_cmd_[i] = NO_NEW_CMD_;
-  }
-
-  for (size_t i = 0; i < 2; ++i) {
-    standard_analog_output_cmd_[i] = NO_NEW_CMD_;
-  }
-
-  io_async_success_ = 1.0;
 }
 
 hardware_interface::return_type URPositionHardwareInterface::prepare_command_mode_switch(
