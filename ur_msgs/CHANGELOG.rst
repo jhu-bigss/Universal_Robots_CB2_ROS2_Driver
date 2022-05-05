@@ -2,6 +2,10 @@
 Changelog for package ur_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2022-05-05)
+------------------
+* Remove SetPayload srv
+
 2.0.0 (2022-04-12)
 ------------------
 * Porting to ros2 (`#12 <https://github.com/destogl/ur_msgs/issues/12>`_)
