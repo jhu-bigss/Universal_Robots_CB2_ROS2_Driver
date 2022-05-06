@@ -207,12 +207,12 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   // Parse status from the UR
   // update the state using the default state updates the UR gives over the specified UR socket
   ur_interface.readFromSocket(urSocket);
-
-  this->JointPos.Position() = vctDoubleVec(ur_interface.cur_joints());
-  this->UpdatePositionCartesian(this->CartPos.Position());
-  this->JointVel.Velocity() = vctDoubleVec(ur_interface.cur_joint_velocity());
-  this->GeoJacobian = ur_interface.getGeoJacobian();
-  // this->UpdateVelocityCartesian(this->CartVel.Velocity());
+  
+  for (uint i = 0; i < info_.joints.size(); i++) {
+    ur_positions_[i] = ur_interface.cur_joints()[i];
+    ur_velocities_[i] = ur_interface.cur_joint_velocity()[i];
+  // ur_cur_jacobian = ur_interface.getGeoJacobian();
+  }
 
   // pausing state follows runtime state when pausing
   if (runtime_state_ == RuntimeState::PAUSED)
@@ -265,27 +265,45 @@ hardware_interface::return_type URPositionHardwareInterface::read()
 
 hardware_interface::return_type URPositionHardwareInterface::write()
 {
-  if (velocityTimeLimit)
-  {
-    if (lastVelocityCommand.Norm() > 0.0001 && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
-    {
-      StopMotion();
-      lastVelocityCommand.SetAll(0.0);
-    }
-  }
+  // if (velocityTimeLimit)
+  // {
+  //   if (lastVelocityCommand.Norm() > 0.0001 && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
+  //   {
+  //     StopMotion();
+  //     lastVelocityCommand.SetAll(0.0);
+  //   }
+  // }
 
   // If there is no interpreting program running on the robot, we do not want to send anything.
-  if (position_controller_running_)
+
+  if (isConnectedToUR)
   {
-    this->SetPositionJoint(ur_position_commands_);
-  }
-  else if (velocity_controller_running_)
-  {
-    this->SetVelocityJoint(ur_velocity_commands_);
-  }
-  else
-  {
-    // Do something to keep it alive
+    if (position_controller_running_)
+    {
+      commandingTraj = true;
+      // std::cout << "ur_position_commands_" << std::endl;
+      // for (const auto &ur_pos : ur_position_commands_)
+      // {
+      //   std::cout << ur_pos << ' ';
+      // }
+      // std::cout << "\n";
+      this->SetPositionJoint(ur_position_commands_);
+    }
+    else if (velocity_controller_running_)
+    {
+      commandingTraj = true;
+      // std::cout << "ur_velocity_commands_" << std::endl;
+      // for (const auto &ur_vel : ur_velocity_commands_){
+      //   std::cout << ur_vel << ' ';
+      // }
+      // std::cout << "\n";
+      this->SetVelocityJoint(ur_velocity_commands_);
+    }
+    else
+    {
+      // Do something to keep it alive
+      commandingTraj = false;
+    }
   }
 
   return hardware_interface::return_type::OK;

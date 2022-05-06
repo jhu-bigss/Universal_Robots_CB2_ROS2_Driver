@@ -195,6 +195,12 @@ def launch_setup(context, *args, **kwargs):
         arguments=["forward_position_controller", "-c", "/controller_manager", "--stopped"],
     )
 
+    forward_velocity_controller_spawner_stopped = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["forward_velocity_controller", "-c", "/controller_manager", "--stopped"],
+    )
+
     # There may be other controllers of the joints, but this is the initially-started one
     initial_joint_controller_spawner_started = Node(
         package="controller_manager",
@@ -217,6 +223,7 @@ def launch_setup(context, *args, **kwargs):
         joint_state_broadcaster_spawner,
         speed_scaling_state_broadcaster_spawner,
         forward_position_controller_spawner_stopped,
+        forward_velocity_controller_spawner_stopped,
         initial_joint_controller_spawner_stopped,
         initial_joint_controller_spawner_started,
     ]

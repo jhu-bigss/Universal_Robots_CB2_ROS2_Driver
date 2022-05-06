@@ -109,7 +109,7 @@ void RobotServer::SetupURProgSocket()
     }
     else
     {
-      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "listening on ");
+      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "listening on socket port: %hu", host_port);
 
     }
   }
@@ -198,18 +198,6 @@ void RobotServer::SendToURClient(const mtsStdString &str)
 #endif // OSA_SOCKET_WITH_STREAM
 }
 
-void RobotServer::SetPositionJoint(const vctDoubleVec& joints)
-{
-  if (use_high_level_pd_) // this is by default false
-  {
-    SendDoubleVec(PD_JOINT_SPACE, joints);
-  }
-  else
-  {
-    SendDoubleVec(JOINT_POSITION, joints);
-  }
-}
-
 void RobotServer::SetPositionJoint(const std::array<double, 6>& joints_pos)
 {
   // Convert arrary<double, 6> to vctDoubleVec
@@ -227,14 +215,6 @@ void RobotServer::SetPositionJoint(const std::array<double, 6>& joints_pos)
   {
     SendDoubleVec(JOINT_POSITION, joints);
   }
-}
-
-void RobotServer::SetVelocityJoint(const vctDoubleVec& joints_vels)
-{
-  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending joint velocity: %d", joints_vels);
-  lastVelocityCommandTime = bigss::time_now_ms();
-  lastVelocityCommand = joints_vels;
-  SendDoubleVec(JOINT_VELOCITY, joints_vels);
 }
 
 void RobotServer::SetVelocityJoint(const std::array<double, 6>& joints_vel)
