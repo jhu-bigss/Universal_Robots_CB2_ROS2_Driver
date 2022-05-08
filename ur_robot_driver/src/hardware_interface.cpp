@@ -176,13 +176,15 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
   // Connect to UR robot server
-  isConnectedToUR = this->ConnectToUR(robot_ip);
+  this->ConnectToUR(robot_ip);
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Is connected to UR? = %s", isConnectedToUR ? "Yes" : "No");
   if (!isConnectedToUR){
     RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
     return CallbackReturn::ERROR;
   }
   else{
     // Send UR script to robot controller
+    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program...");
     this->ProgramFromFile(script_filename);
   }
 

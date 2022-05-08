@@ -109,8 +109,7 @@ void RobotServer::SetupURProgSocket()
     }
     else
     {
-      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "listening on socket port: %hu", host_port);
-
+      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "UR is listening on server socket port: %hu", host_port);
     }
   }
   else
@@ -124,71 +123,12 @@ void RobotServer::AssignServerPort(const unsigned short port)
   this->host_port = port;
 }
 
-// void RobotServer::Startup()
-// {
-// }
-
-// void RobotServer::Run()
-// {
-//   // Parse status from the UR
-//   if (isConnectedToUR)
-//   {
-//     // update the state using the default state updates the UR gives over
-//     // the specified UR socket
-//     ur_interface.readFromSocket(urSocket);
-
-//     //ur_interface.saveDH();
-//     //for(int i=0; i<6; i++) {
-//     //  std::cout << "a: " << ur_interface.a[i];
-//     //  std::cout << " alpha: " << ur_interface.alpha[i];
-//     //  std::cout << " d: " << ur_interface.d[i] << std::endl;
-//     //}
-
-//     this->JointPos.Position() = vctDoubleVec(ur_interface.cur_joints());
-//     this->UpdatePositionCartesian(this->CartPos.Position());
-//     this->JointVel.Velocity() = vctDoubleVec(ur_interface.cur_joint_velocity());
-//     this->GeoJacobian = ur_interface.getGeoJacobian();
-//     // this->UpdateVelocityCartesian(this->CartVel.Velocity());
-
-//     if (velocityTimeLimit)
-//     {
-//       if(lastVelocityCommand.Norm() > 0.0001
-//        && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
-//       {
-//         StopMotion();
-//         lastVelocityCommand.SetAll(0.0);
-//       }
-//     }
-
-//     if (commandingTraj)
-//     {
-//       RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "commanding traj");
-
-//       if (CheckTrajUpdate())
-//       {
-//         std::cout << "updating traj id" << std::endl;
-//         trajID ++;
-//       }
-
-//       // if reached end of trajectory, stop the motion
-//       if (trajID >= jointTraj.cols())
-//       {
-//         commandingTraj = false;
-//         StopMotion();
-//       }
-//       else
-//         StepTraj ();
-//     }
-//   }
-// }
-
 void RobotServer::SendToURClient(const mtsStdString &str)
 {
   if(progSocket == 0) {
     RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "No valid server socket");
     return;
   }
-
   RCLCPP_DEBUG(rclcpp::get_logger("URPositionHardwareInterface"), "Sending message: %s", str.Data.c_str());
 
 #ifdef OSA_SOCKET_WITH_STREAM
@@ -293,6 +233,8 @@ void RobotServer::SendDoubleVec(const unsigned long mode, const vctDoubleVec& v,
   typedef vctDoubleVec::size_type size_type;
 
   std::ostringstream oss;
+  // format the float values - using fixed
+  oss << std::fixed << std::setprecision(5);
   oss << '(' << mode;
 
   const size_type v_len = v.size();
@@ -319,7 +261,6 @@ void RobotServer::SendDoubleVec(const unsigned long mode, const vctDoubleVec& v,
 bool RobotServer::ConnectToUR(const std::string& ur_host, unsigned short ur_port)
 {
   isConnectedToUR = urSocket.Connect(ur_host.c_str(), ur_port);
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Is connected to UR? = %d" , isConnectedToUR);
   return isConnectedToUR;
 }
 
@@ -364,8 +305,6 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
 
   // there must be an additional new line to start the program
   new_str.push_back('\n');
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program...");
-  // RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program: %s", new_str.c_str());
   urSocket.Send(new_str.c_str(), (unsigned int)new_str.length());
 
   // if we don't care about communicating with the program, return
@@ -382,7 +321,7 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
   } while (progSocket == 0 && count < 20);
 
   isConnectedToProg = (progSocket != 0);
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "UR Connection established? = %d", isConnectedToProg);
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "progSocket connection established? = %s", isConnectedToProg ? "Yes" : "No");
 }
 
 void RobotServer::GetJointModes(vctInt6 &modes) const
