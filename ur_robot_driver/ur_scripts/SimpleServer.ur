@@ -7,7 +7,7 @@ def SimpleServer():
   PORT = ${HOSTPORT}
   prog_running = socket_open(ADDRESS, PORT)
   if prog_running:
-    textmsg("Successfully connect to server")
+    textmsg("Successfully connect to server: ", ADDRESS)
   else:
     textmsg("Could not connect to server: ")
     textmsg(ADDRESS, PORT)
@@ -52,7 +52,7 @@ def SimpleServer():
 
 
   max_vel_mult = 1.0 # user-settable multiplier for the speed. [0 - 1]
-
+  timeout_occurance = 0
 
   # Main run loop
   while prog_running:
@@ -145,11 +145,19 @@ def SimpleServer():
       textmsg("Invalid Mode: ", mode_val)
     end
 
+    if val[0] == 0:
+      # no data received
+      timeout_occurance = timeout_occurance + 1
+      if timeout_occurance > 5: 
+        prog_running = False
+        textmsg("Failed to receive data from server 5 times.")
+        textmsg("Program shutting down...")
+      end
+    end
+
     sync()
 
   end
-
-  prog_running = False
 
   join spatial_vel_thrd
   join move_joint_vel_thrd
