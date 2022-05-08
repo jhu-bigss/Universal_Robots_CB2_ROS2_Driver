@@ -109,7 +109,7 @@ void RobotServer::SetupURProgSocket()
     }
     else
     {
-      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "UR is listening on server socket port: %hu", host_port);
+      RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "listening on host_port: %hu", host_port);
     }
   }
   else

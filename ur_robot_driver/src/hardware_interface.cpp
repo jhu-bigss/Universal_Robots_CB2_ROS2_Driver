@@ -20,8 +20,6 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#include "ur_robot_driver/ur/bigss_debug_util.h"
-
 namespace ur_robot_driver
 {
 CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::HardwareInfo & info)
@@ -268,38 +266,18 @@ hardware_interface::return_type URPositionHardwareInterface::read()
 
 hardware_interface::return_type URPositionHardwareInterface::write()
 {
-  // if (velocityTimeLimit)
-  // {
-  //   if (lastVelocityCommand.Norm() > 0.0001 && bigss::time_now_ms() - lastVelocityCommandTime > lastVelocityCommandThresh)
-  //   {
-  //     StopMotion();
-  //     lastVelocityCommand.SetAll(0.0);
-  //   }
-  // }
-
   // If there is no interpreting program running on the robot, we do not want to send anything.
 
-  if (isConnectedToUR)
+  if (isConnectedToProg)
   {
     if (position_controller_running_)
     {
       commandingTraj = true;
-      // std::cout << "ur_position_commands_" << std::endl;
-      // for (const auto &ur_pos : ur_position_commands_)
-      // {
-      //   std::cout << ur_pos << ' ';
-      // }
-      // std::cout << "\n";
       this->SetPositionJoint(ur_position_commands_);
     }
     else if (velocity_controller_running_)
     {
       commandingTraj = true;
-      // std::cout << "ur_velocity_commands_" << std::endl;
-      // for (const auto &ur_vel : ur_velocity_commands_){
-      //   std::cout << ur_vel << ' ';
-      // }
-      // std::cout << "\n";
       this->SetVelocityJoint(ur_velocity_commands_);
     }
     else
