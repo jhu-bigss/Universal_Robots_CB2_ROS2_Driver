@@ -270,10 +270,11 @@ hardware_interface::return_type URPositionHardwareInterface::write()
 
   if (isConnectedToProg)
   {
-    if (position_controller_running_)
+    if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
     {
       commandingTraj = true;
       this->SetPositionJoint(ur_position_commands_);
+      ur_position_commands_old_ = ur_position_commands_;
     }
     else if (velocity_controller_running_)
     {

@@ -135,6 +135,7 @@ void RobotServer::SendToURClient(const mtsStdString &str)
   *progSocket << str.c_str();
 #else
   progSocket->Send(str.Data.c_str());
+  // std::cout << str.Data << std::endl;
 #endif // OSA_SOCKET_WITH_STREAM
 }
 
