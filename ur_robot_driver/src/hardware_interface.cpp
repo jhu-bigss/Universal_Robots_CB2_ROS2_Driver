@@ -42,7 +42,6 @@ CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::Ha
   // hw_port_ = std::stoul(info_.hardware_parameters["port"]);
   position_controller_running_ = false;
   velocity_controller_running_ = false;
-  pausing_ramp_up_increment_ = 0.01;
   controllers_initialized_ = false;
   first_pass_ = true;
   initialized_ = false;
@@ -138,9 +137,6 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
       hardware_interface::CommandInterface("speed_scaling", "target_speed_fraction_cmd", &target_speed_fraction_cmd_));
 
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
-      "speed_scaling", "target_speed_fraction_async_success", &scaling_async_success_));
-
-  command_interfaces.emplace_back(hardware_interface::CommandInterface(
       "resend_robot_program", "resend_robot_program_cmd", &resend_robot_program_cmd_));
 
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
@@ -218,7 +214,6 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   robot_mode_data_ = ur_interface.robotMode.rmd;
   robot_mode_ = static_cast<UniversalRobot::RobotMode>(robot_mode_data_.state.robotMode);
   target_speed_fraction_ = ur_interface.unionValue(robot_mode_data_.targetSpeedFraction);
-
 
   if (first_pass_ && !initialized_)
   {

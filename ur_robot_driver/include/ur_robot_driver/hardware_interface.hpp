@@ -40,23 +40,6 @@
 
 namespace ur_robot_driver
 {
-enum class RuntimeState
-{
-  STOPPING,
-  STOPPED,
-  PLAYING,
-  PAUSING,
-  PAUSED,
-  RESUMING
-};
-
-enum class PausingState
-{
-  PAUSED,
-  RUNNING,
-  RAMPUP
-};
-
 enum StoppingInterface
 {
   NONE,
@@ -116,18 +99,11 @@ protected:
   // robot states
   UniversalRobot::RobotModeData robot_mode_data_;
   UniversalRobot::RobotMode robot_mode_;
-  RuntimeState runtime_state_;
-  PausingState pausing_state_;
-  double pausing_ramp_up_increment_;
   bool controllers_initialized_;
 
-  double speed_scaling_;
-  double target_speed_fraction_;
-  double speed_scaling_combined_;
-
   // asynchronous commands
+  double target_speed_fraction_;
   double target_speed_fraction_cmd_;
-  double scaling_async_success_;
   double resend_robot_program_cmd_;
   double resend_robot_program_async_success_;
   bool first_pass_;
