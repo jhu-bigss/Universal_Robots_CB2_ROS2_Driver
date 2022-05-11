@@ -4,7 +4,6 @@
 
 #include <cstring>
 #include <cisstOSAbstraction/osaSocket.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 RobotInterface::RobotInterface() :
   moving(false)
@@ -18,10 +17,6 @@ RobotInterface::RobotInterface() :
   memset(&configurationData.raw[0], 0, sizeof(configurationData));
   memset(&forceModeData.raw[0], 0, sizeof(forceModeData));
   memset(&additionalInfo.raw[0], 0, sizeof(additionalInfo));
-
-  // mtsInterfaceProvided *provided = this->AddInterfaceProvided("movement");
-  // if(provided)
-  //   provided->AddEventWrite(this->MovementChangedTrigger, "MovementChanged", mtsBool());
 }
 
 RobotInterface::~RobotInterface()
@@ -46,8 +41,6 @@ void RobotInterface::readPacket(const char *buf, const int len)
   UniversalRobot::intUnion packLen;
   int packType;
 
-  bool curMove = false;
-
   // read in each individual packet
   while(readBytes < len) {
     memcpy(&packLen.raw[0], &buf[0], 4);
@@ -66,19 +59,7 @@ void RobotInterface::readPacket(const char *buf, const int len)
       {
         cur_joint_velocity_[i] = unionValue(jointData.jd.joint[i].qd_actual);
         cur_joints_[i] = unionValue(jointData.jd.joint[i].q_actual);
-        if(cur_joint_velocity_[i] != 0)
-          curMove = true;
       }
-
-      // check if there has been a change in the movement of the robot
-      // If so, send an event with a boolean indicating the new movement state
-      if( (moving && !curMove) || (!moving && curMove) ) {
-        mtsBool data;
-        data.Data = curMove;
-        // this->MovementChangedTrigger(data);
-      }
-
-      moving = curMove;
       cur_geo_jac_ = ur_kin_.geo_jac(cur_joints_);
 
       break;

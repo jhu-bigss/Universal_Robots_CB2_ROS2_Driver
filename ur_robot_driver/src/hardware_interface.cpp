@@ -42,8 +42,6 @@ CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::Ha
   // hw_port_ = std::stoul(info_.hardware_parameters["port"]);
   position_controller_running_ = false;
   velocity_controller_running_ = false;
-  runtime_state_ = RuntimeState::STOPPED;
-  pausing_state_ = PausingState::RUNNING;
   pausing_ramp_up_increment_ = 0.01;
   controllers_initialized_ = false;
   first_pass_ = true;
@@ -117,9 +115,6 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
     state_interfaces.emplace_back(hardware_interface::StateInterface(
         info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &ur_efforts_[i]));
   }
-
-  state_interfaces.emplace_back(
-      hardware_interface::StateInterface("speed_scaling", "speed_scaling_factor", &speed_scaling_combined_));
 
   state_interfaces.emplace_back(
       hardware_interface::StateInterface("system_interface", "initialized", &system_interface_initialized_));
@@ -209,46 +204,21 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   // update the state using the default state updates the UR gives over the specified UR socket
   ur_interface.readFromSocket(urSocket);
   
+  // joint positions, velocities, and jacobians
   for (uint i = 0; i < info_.joints.size(); i++) {
-    ur_positions_[i] = ur_interface.cur_joints()[i];
-    ur_velocities_[i] = ur_interface.cur_joint_velocity()[i];
-  // ur_cur_jacobian = ur_interface.getGeoJacobian();
+    UniversalRobot::SingleJoint cur_joint_ = ur_interface.jointData.jd.joint[i];
+    ur_positions_[i] = ur_interface.unionValue(cur_joint_.q_actual);
+    ur_velocities_[i] = ur_interface.unionValue(cur_joint_.qd_actual);
+    ur_efforts_[i] = ur_interface.unionValue(cur_joint_.I_actual);
+    // UniversalRobot::JointMode joint_mode_[i] = static_cast<UniversalRobot::JointMode>(cur_joint_.jointMode);
   }
+    ur_jacobians_ = ur_interface.getGeoJacobian();
 
-  // pausing state follows runtime state when pausing
-  if (runtime_state_ == RuntimeState::PAUSED)
-  {
-    pausing_state_ = PausingState::PAUSED;
-  }
-  else if (runtime_state_ == RuntimeState::PLAYING &&
-           pausing_state_ == PausingState::PAUSED)
-  {
-    // When the robot resumed program execution and pausing state was PAUSED, we enter RAMPUP
-    speed_scaling_combined_ = 0.0;
-    pausing_state_ = PausingState::RAMPUP;
-  }
+  // other robot states data
+  robot_mode_data_ = ur_interface.robotMode.rmd;
+  robot_mode_ = static_cast<UniversalRobot::RobotMode>(robot_mode_data_.state.robotMode);
+  target_speed_fraction_ = ur_interface.unionValue(robot_mode_data_.targetSpeedFraction);
 
-  if (pausing_state_ == PausingState::RAMPUP)
-  {
-    double speed_scaling_ramp = speed_scaling_combined_ + pausing_ramp_up_increment_;
-    speed_scaling_combined_ = std::min(speed_scaling_ramp, speed_scaling_ * target_speed_fraction_);
-
-    if (speed_scaling_ramp > speed_scaling_ * target_speed_fraction_)
-    {
-      pausing_state_ = PausingState::RUNNING;
-    }
-  }
-  else if (runtime_state_ == RuntimeState::RESUMING)
-  {
-    // We have to keep speed scaling on ROS side at 0 during RESUMING to prevent controllers from
-    // continuing to interpolate
-    speed_scaling_combined_ = 0.0;
-  }
-  else
-  {
-    // Normal case
-    speed_scaling_combined_ = speed_scaling_ * target_speed_fraction_;
-  }
 
   if (first_pass_ && !initialized_)
   {
@@ -268,7 +238,7 @@ hardware_interface::return_type URPositionHardwareInterface::write()
 {
   // If there is no interpreting program running on the robot, we do not want to send anything.
 
-  if (isConnectedToProg)
+  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning)
   {
     if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
     {

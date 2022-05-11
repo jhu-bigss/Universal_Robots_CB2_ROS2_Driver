@@ -31,6 +31,8 @@
 
 // UR stuff
 #include "ur_robot_driver/ur/RobotServer.h"
+#include "ur_robot_driver/ur/RobotState.h"
+#include "ur_robot_driver/ur/URDHKinematics.h"
 
 // ROS
 #include "rclcpp/macros.hpp"
@@ -109,8 +111,11 @@ protected:
   std::array<double, 6> ur_positions_;
   std::array<double, 6> ur_velocities_;
   std::array<double, 6> ur_efforts_;
+  URDHKinematics::JacobianMatrix ur_jacobians_;
 
   // robot states
+  UniversalRobot::RobotModeData robot_mode_data_;
+  UniversalRobot::RobotMode robot_mode_;
   RuntimeState runtime_state_;
   PausingState pausing_state_;
   double pausing_ramp_up_increment_;
