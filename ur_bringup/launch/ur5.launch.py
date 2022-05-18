@@ -53,16 +53,8 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            "fake_sensor_commands",
-            default_value="false",
-            description="Enable fake command interfaces for sensors used for simple simulations. \
-            Used only if 'use_fake_hardware' parameter is true.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="scaled_joint_trajectory_controller",
+            default_value="joint_trajectory_controller",
             description="Initially loaded robot controller.",
             choices=[
                 "scaled_joint_trajectory_controller",
@@ -83,7 +75,6 @@ def generate_launch_description():
     # Initialize Arguments
     robot_ip = LaunchConfiguration("robot_ip")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
-    fake_sensor_commands = LaunchConfiguration("fake_sensor_commands")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
     activate_joint_controller = LaunchConfiguration("activate_joint_controller")
 
@@ -93,7 +84,6 @@ def generate_launch_description():
             "ur_type": "ur5",
             "robot_ip": robot_ip,
             "use_fake_hardware": use_fake_hardware,
-            "fake_sensor_commands": fake_sensor_commands,
             "initial_joint_controller": initial_joint_controller,
             "activate_joint_controller": activate_joint_controller,
         }.items(),
