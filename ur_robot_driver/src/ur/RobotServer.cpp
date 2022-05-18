@@ -463,9 +463,9 @@ void RobotServer::GetUseHighLevelPDControl(bool& b)
   b = use_high_level_pd_;
 }
 
-void RobotServer::SetURType(const bool isUR5)
+void RobotServer::SetURType(const std::string &robot_name)
 {
-  if(isUR5)
+  if(robot_name == "ur5")
     ur_kins_.set_ur5();
   else
     ur_kins_.set_ur10();

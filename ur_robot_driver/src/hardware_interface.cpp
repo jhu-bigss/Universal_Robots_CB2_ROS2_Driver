@@ -149,6 +149,7 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
 {
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting ...please wait...");
 
+  std::string robot_name = info_.hardware_parameters["name"];
   // The robot's IP address.
   std::string robot_ip = info_.hardware_parameters["robot_ip"];
   // Path to the urscript code that will be sent to the robot
@@ -163,6 +164,9 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
   int servoj_gain = stoi(info_.hardware_parameters["servoj_gain"]);
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
+
+  // Set the UR type
+  this->SetURType(robot_name);
 
   // Connect to UR robot server
   this->ConnectToUR(robot_ip);

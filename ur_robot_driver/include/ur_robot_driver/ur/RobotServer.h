@@ -110,9 +110,7 @@ public:
 
   void AssignServerPort(const unsigned short port);
 
-  /// Set the UR type.
-  /// \param isUR5 If true, this is UR5 [default]. Otherwise, UR10
-  void SetURType(const bool isUR5 = true);
+  void SetURType(const std::string &str);
 
   void SendToURClient(const mtsStdString &str);
 
