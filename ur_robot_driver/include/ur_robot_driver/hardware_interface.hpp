@@ -35,6 +35,7 @@
 #include "ur_robot_driver/ur/URDHKinematics.h"
 
 // ROS
+#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
@@ -115,6 +116,9 @@ protected:
   std::vector<std::string> start_modes_;
   bool position_controller_running_;
   bool velocity_controller_running_;
+
+  // timer to limit sending cmd frequency should be <= 125 Hz
+  rclcpp::Time time_last_cmd_send_;
 };
 
 }  // namespace ur_robot_driver
