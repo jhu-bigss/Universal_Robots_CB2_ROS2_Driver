@@ -119,6 +119,7 @@ protected:
 
   // timer to limit sending cmd frequency should be <= 125 Hz
   rclcpp::Time time_last_cmd_send_;
+  rclcpp::Time time_now_;
 };
 
 }  // namespace ur_robot_driver

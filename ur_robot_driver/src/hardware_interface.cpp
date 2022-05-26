@@ -236,7 +236,7 @@ hardware_interface::return_type URPositionHardwareInterface::read()
 hardware_interface::return_type URPositionHardwareInterface::write()
 {
   // If there is no interpreting program running on the robot, we do not want to send anything.
-  rclcpp::Time time_now_ = rclcpp::Clock().now();
+  time_now_ = rclcpp::Clock().now();
   rclcpp::Duration time_since_last_send_ = time_now_ - time_last_cmd_send_;
 
   if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
