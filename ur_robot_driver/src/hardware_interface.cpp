@@ -160,6 +160,11 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
   // The driver will offer an interface to receive the program's URScript on this port.
   int script_sender_port = stoi(info_.hardware_parameters["script_sender_port"]);
 
+  // Enables non_blocking_read mode. Should only be used with combined_robot_hw. Disables error generated when read
+  // returns without any data, sets the read timeout to zero, and synchronises read/write operations. Enabling this when
+  // not used with combined_robot_hw can suppress important errors and affect real-time performance.
+  non_blocking_read_ = static_cast<bool>(stoi(info_.hardware_parameters["non_blocking_read"]));
+
   // Specify gain for servoing to position in joint space.
   // A higher gain can sharpen the trajectory.
   int servoj_gain = stoi(info_.hardware_parameters["servoj_gain"]);
@@ -204,6 +209,7 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   // Parse status from the UR
   // update the state using the default state updates the UR gives over the specified UR socket
   ur_interface.readFromSocket(urSocket);
+  packet_read_ = true;
   
   // joint positions, velocities, and jacobians
   for (uint i = 0; i < info_.joints.size(); i++) {
@@ -248,7 +254,7 @@ hardware_interface::return_type URPositionHardwareInterface::write()
   time_now_ = rclcpp::Clock().now();
   rclcpp::Duration time_since_last_send_ = time_now_ - time_last_cmd_send_;
 
-  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
+  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && (!non_blocking_read_ || packet_read_) && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
   {
     if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
     {
@@ -264,6 +270,7 @@ hardware_interface::return_type URPositionHardwareInterface::write()
       // Do something to keep it alive
     }
     time_last_cmd_send_ = time_now_;
+    packet_read_ = false;
   }
 
   return hardware_interface::return_type::OK;
