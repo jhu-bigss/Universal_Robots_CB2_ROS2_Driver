@@ -35,9 +35,9 @@
 #include "ur_robot_driver/ur/URDHKinematics.h"
 
 // ROS
-#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/state.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 namespace ur_robot_driver
 {
@@ -89,13 +89,18 @@ public:
   static constexpr double NO_NEW_CMD_ = std::numeric_limits<double>::quiet_NaN();
 
 protected:
+  void extractToolPose();
+
   std::array<double, 6> ur_position_commands_;
   std::array<double, 6> ur_position_commands_old_;
   std::array<double, 6> ur_velocity_commands_;
-  std::array<double, 6> ur_positions_;
-  std::array<double, 6> ur_velocities_;
-  std::array<double, 6> ur_efforts_;
+  std::array<double, 6> ur_joint_positions_;
+  std::array<double, 6> ur_joint_velocities_;
+  std::array<double, 6> ur_joint_efforts_;
   URDHKinematics::JacobianMatrix ur_jacobians_;
+  std::array<double, 6> ur_tcp_pose_;
+
+  geometry_msgs::msg::TransformStamped tcp_transform_;
 
   // robot states
   UniversalRobot::RobotModeData robot_mode_data_;
@@ -125,3 +130,4 @@ protected:
 }  // namespace ur_robot_driver
 
 #endif  // UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
+

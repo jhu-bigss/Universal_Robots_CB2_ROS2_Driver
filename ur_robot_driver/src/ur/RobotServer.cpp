@@ -69,7 +69,6 @@ RobotServer::RobotServer(const std::string &name, const unsigned short &sp) :
   trajTolerance (0.01),
   trajID (0),
   trajVel (0.02),
-  commandingTraj (false),
   ur_kins_(),
   use_high_level_pd_(false),
   ur_interface(),
@@ -386,7 +385,6 @@ void RobotServer::StopMotion(void)
 {
   // stop commanding a trajectory
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Stopping robot");
-  commandingTraj = false;
 
   vctDoubleVec joint_acc(1);
   joint_acc[0] = 3;
@@ -545,8 +543,6 @@ void RobotServer::CommandCartesianTrajectory(const std::vector <vctFrm4x4> &pose
 
   if (nPoses == 0)
     std::cout << "No valid trajectory data provided." << std::endl;
-
-  commandingTraj = true;
 
   // compute the velocity
   prevJoint = vctDoubleVec(ur_interface.cur_joints());

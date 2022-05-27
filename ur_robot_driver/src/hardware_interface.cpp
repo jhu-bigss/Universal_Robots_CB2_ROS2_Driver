@@ -28,9 +28,10 @@ CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::Ha
   }
 
   // state interface
-  ur_positions_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
-  ur_velocities_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
-  ur_efforts_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  ur_joint_positions_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  ur_joint_velocities_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  ur_joint_efforts_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
+  ur_tcp_pose_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   // command interface
   ur_position_commands_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
@@ -106,13 +107,13 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
   for (uint i = 0; i < info_.joints.size(); i++) {
     // position interfaces
     state_interfaces.emplace_back(hardware_interface::StateInterface(
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &ur_positions_[i]));
+      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &ur_joint_positions_[i]));
 
     state_interfaces.emplace_back(hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &ur_velocities_[i]));
+        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &ur_joint_velocities_[i]));
 
     state_interfaces.emplace_back(hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &ur_efforts_[i]));
+        info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &ur_joint_efforts_[i]));
   }
 
   state_interfaces.emplace_back(
@@ -207,12 +208,20 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   // joint positions, velocities, and jacobians
   for (uint i = 0; i < info_.joints.size(); i++) {
     UniversalRobot::SingleJoint cur_joint_ = ur_interface.jointData.jd.joint[i];
-    ur_positions_[i] = ur_interface.unionValue(cur_joint_.q_actual);
-    ur_velocities_[i] = ur_interface.unionValue(cur_joint_.qd_actual);
-    ur_efforts_[i] = ur_interface.unionValue(cur_joint_.I_actual);
+    ur_joint_positions_[i] = ur_interface.unionValue(cur_joint_.q_actual);
+    ur_joint_velocities_[i] = ur_interface.unionValue(cur_joint_.qd_actual);
+    ur_joint_efforts_[i] = ur_interface.unionValue(cur_joint_.I_actual);
     // UniversalRobot::JointMode joint_mode_[i] = static_cast<UniversalRobot::JointMode>(cur_joint_.jointMode);
   }
     ur_jacobians_ = ur_interface.getGeoJacobian();
+
+    ur_tcp_pose_[0] = ur_interface.unionValue(ur_interface.cartesianInfo.info.x);
+    ur_tcp_pose_[1] = ur_interface.unionValue(ur_interface.cartesianInfo.info.y);
+    ur_tcp_pose_[2] = ur_interface.unionValue(ur_interface.cartesianInfo.info.z);
+    ur_tcp_pose_[3] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rx);
+    ur_tcp_pose_[4] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Ry);
+    ur_tcp_pose_[5] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rz);
+    extractToolPose();
 
   // other robot states data
   robot_mode_data_ = ur_interface.robotMode.rmd;
@@ -222,7 +231,7 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   if (first_pass_ && !initialized_)
   {
     // initialize commands
-    ur_position_commands_ = ur_position_commands_old_ = ur_positions_;
+    ur_position_commands_ = ur_position_commands_old_ = ur_joint_positions_;
     ur_velocity_commands_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     target_speed_fraction_cmd_ = NO_NEW_CMD_;
     resend_robot_program_cmd_ = NO_NEW_CMD_;
@@ -243,24 +252,41 @@ hardware_interface::return_type URPositionHardwareInterface::write()
   {
     if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
     {
-      commandingTraj = true;
       this->SetPositionJoint(ur_position_commands_);
       ur_position_commands_old_ = ur_position_commands_;
     }
     else if (velocity_controller_running_)
     {
-      commandingTraj = true;
       this->SetVelocityJoint(ur_velocity_commands_);
     }
     else
     {
       // Do something to keep it alive
-      commandingTraj = false;
     }
     time_last_cmd_send_ = time_now_;
   }
 
   return hardware_interface::return_type::OK;
+}
+
+void URPositionHardwareInterface::extractToolPose()
+{
+  // imported from ROS1 driver hardware_interface.cpp#L911-L928
+  double tcp_angle =
+      std::sqrt(std::pow(ur_tcp_pose_[3], 2) + std::pow(ur_tcp_pose_[4], 2) + std::pow(ur_tcp_pose_[5], 2));
+
+  tf2::Vector3 rotation_vec(ur_tcp_pose_[3], ur_tcp_pose_[4], ur_tcp_pose_[5]);
+  tf2::Quaternion rotation;
+  if (tcp_angle > 1e-16) {
+    rotation.setRotation(rotation_vec.normalized(), tcp_angle);
+  } else {
+    rotation.setValue(0.0, 0.0, 0.0, 1.0);  // default Quaternion is 0,0,0,0 which is invalid
+  }
+  tcp_transform_.transform.translation.x = ur_tcp_pose_[0];
+  tcp_transform_.transform.translation.y = ur_tcp_pose_[1];
+  tcp_transform_.transform.translation.z = ur_tcp_pose_[2];
+
+  tcp_transform_.transform.rotation = tf2::toMsg(rotation);
 }
 
 hardware_interface::return_type URPositionHardwareInterface::prepare_command_mode_switch(
@@ -323,7 +349,7 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
   if (stop_modes_.size() != 0 &&
       std::find(stop_modes_.begin(), stop_modes_.end(), StoppingInterface::STOP_POSITION) != stop_modes_.end()) {
     position_controller_running_ = false;
-    ur_position_commands_ = ur_position_commands_old_ = ur_positions_;
+    ur_position_commands_ = ur_position_commands_old_ = ur_joint_positions_;
   } else if (stop_modes_.size() != 0 &&
              std::find(stop_modes_.begin(), stop_modes_.end(), StoppingInterface::STOP_VELOCITY) != stop_modes_.end()) {
     velocity_controller_running_ = false;
@@ -333,7 +359,7 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
   if (start_modes_.size() != 0 &&
       std::find(start_modes_.begin(), start_modes_.end(), hardware_interface::HW_IF_POSITION) != start_modes_.end()) {
     velocity_controller_running_ = false;
-    ur_position_commands_ = ur_position_commands_old_ = ur_positions_;
+    ur_position_commands_ = ur_position_commands_old_ = ur_joint_positions_;
     position_controller_running_ = true;
 
   } else if (start_modes_.size() != 0 && std::find(start_modes_.begin(), start_modes_.end(),
