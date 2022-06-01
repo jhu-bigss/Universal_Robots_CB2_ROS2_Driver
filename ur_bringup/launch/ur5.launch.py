@@ -46,6 +46,13 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
+            "sim",
+            default_value="false",
+            description="Start gazebo simulation.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
             "use_fake_hardware",
             default_value="false",
             description="Start robot with fake hardware mirroring command to its states.",
@@ -74,6 +81,7 @@ def generate_launch_description():
 
     # Initialize Arguments
     robot_ip = LaunchConfiguration("robot_ip")
+    sim = LaunchConfiguration("sim")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
     activate_joint_controller = LaunchConfiguration("activate_joint_controller")
@@ -82,6 +90,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([ThisLaunchFileDir(), "/ur_control.launch.py"]),
         launch_arguments={
             "ur_type": "ur5",
+            "sim": sim,
             "robot_ip": robot_ip,
             "use_fake_hardware": use_fake_hardware,
             "initial_joint_controller": initial_joint_controller,
