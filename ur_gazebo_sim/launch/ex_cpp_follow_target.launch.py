@@ -41,7 +41,11 @@ def generate_launch_description() -> LaunchDescription:
             PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
             " ",
             "name:=",
+            "ur",
+            " ",
+            "ur_type:=",
             ur_type,
+            " ",
         ]
     )
     robot_description = {"robot_description": _robot_description_xml}
@@ -60,7 +64,8 @@ def generate_launch_description() -> LaunchDescription:
             ),
             " ",
             "name:=",
-            ur_type,
+            "ur",
+            " ",
         ]
     )
     robot_description_semantic = {

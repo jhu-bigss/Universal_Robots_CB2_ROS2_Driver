@@ -6,7 +6,7 @@
 #include <rclcpp/qos.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-const std::string MOVE_GROUP = "ur5";
+const std::string MOVE_GROUP = "ur_manipulator";
 
 class MoveItFollowTarget : public rclcpp::Node
 {
