@@ -56,18 +56,6 @@ def launch_setup(context, *args, **kwargs):
     launch_rviz = LaunchConfiguration("launch_rviz")
     launch_servo = LaunchConfiguration("launch_servo")
 
-    joint_limit_params = PathJoinSubstitution(
-        [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
-    )
-    kinematics_params = PathJoinSubstitution(
-        [FindPackageShare(description_package), "config", ur_type, "default_kinematics.yaml"]
-    )
-    physical_params = PathJoinSubstitution(
-        [FindPackageShare(description_package), "config", ur_type, "physical_parameters.yaml"]
-    )
-    visual_params = PathJoinSubstitution(
-        [FindPackageShare(description_package), "config", ur_type, "visual_parameters.yaml"]
-    )
     script_filename = PathJoinSubstitution(
         [FindPackageShare("ur_robot_driver"), "ur_scripts", "SimpleServer.ur"]
     )
@@ -80,17 +68,13 @@ def launch_setup(context, *args, **kwargs):
             " ",
             "robot_ip:=xxx.yyy.zzz.www",
             " ",
-            "joint_limit_params:=",
-            joint_limit_params,
+            "name:=",
+            # Also ur_type parameter could be used but then the planning group names in yaml
+            # configs has to be updated!
+            "ur",
             " ",
-            "kinematics_params:=",
-            kinematics_params,
-            " ",
-            "physical_params:=",
-            physical_params,
-            " ",
-            "visual_params:=",
-            visual_params,
+            "ur_type:=",
+            ur_type,
             " ",
             "safety_limits:=",
             safety_limits,
@@ -100,9 +84,6 @@ def launch_setup(context, *args, **kwargs):
             " ",
             "safety_k_position:=",
             safety_k_position,
-            " ",
-            "name:=",
-            ur_type,
             " ",
             "script_filename:=",
             script_filename,
