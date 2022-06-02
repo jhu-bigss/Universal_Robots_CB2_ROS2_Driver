@@ -4,10 +4,11 @@
 from typing import List
 
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -16,7 +17,11 @@ def generate_launch_description() -> LaunchDescription:
     declared_arguments = generate_declared_arguments()
 
     # Get substitution for all arguments
-    model = LaunchConfiguration("model")
+    robot_sdf_path = PathJoinSubstitution([
+                        FindPackageShare("ur_description"),
+                        "sdf",
+                        "ur5.sdf",
+                    ])
     use_sim_time = LaunchConfiguration("use_sim_time")
     log_level = LaunchConfiguration("log_level")
 
@@ -27,7 +32,7 @@ def generate_launch_description() -> LaunchDescription:
             package="ros_ign_gazebo",
             executable="create",
             output="log",
-            arguments=["-file", model, "--ros-args", "--log-level", log_level],
+            arguments=["-file", robot_sdf_path, "--ros-args", "--log-level", log_level],
             parameters=[{"use_sim_time": use_sim_time}],
         ),
     ]
@@ -41,13 +46,6 @@ def generate_declared_arguments() -> List[DeclareLaunchArgument]:
     """
 
     return [
-        # Model for Ignition Gazebo
-        DeclareLaunchArgument(
-            "model",
-            default_value="ur5",
-            description="Name or filepath of model to load.",
-        ),
-        # Miscellaneous
         DeclareLaunchArgument(
             "use_sim_time",
             default_value="true",
