@@ -86,7 +86,7 @@ controller_interface::InterfaceConfiguration SpeedScalingStateBroadcaster::state
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 SpeedScalingStateBroadcaster::on_configure(const rclcpp_lifecycle::State& /*previous_state*/)
 {
-  if (!node_->get_parameter("state_publish_rate", publish_rate_)) {
+  if (!get_node()->get_parameter("state_publish_rate", publish_rate_)) {
     RCLCPP_INFO(get_node()->get_logger(), "Parameter 'state_publish_rate' not set");
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   } else {
