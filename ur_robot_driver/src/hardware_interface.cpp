@@ -204,7 +204,7 @@ CallbackReturn URPositionHardwareInterface::on_deactivate(const rclcpp_lifecycle
 }
 
 
-hardware_interface::return_type URPositionHardwareInterface::read()
+hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   // Parse status from the UR
   // update the state using the default state updates the UR gives over the specified UR socket
@@ -248,7 +248,7 @@ hardware_interface::return_type URPositionHardwareInterface::read()
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type URPositionHardwareInterface::write()
+hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   // If there is no interpreting program running on the robot, we do not want to send anything.
   time_now_ = rclcpp::Clock().now();

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(ur_robot_driver)
 
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
 add_compile_options(-Wno-unused-parameter)
@@ -36,6 +36,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_lifecycle
   std_srvs
   std_msgs
+  tf2_geometry_msgs
   controller_manager_msgs
   cisst
 )

@@ -37,10 +37,12 @@
 // ROS
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/state.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 namespace ur_robot_driver
 {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+
 enum StoppingInterface
 {
   NONE,
@@ -75,10 +77,10 @@ public:
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
   TEMPLATES__ROS2_CONTROL__HARDWARE_PUBLIC
-  hardware_interface::return_type read() override;
+  hardware_interface::return_type read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
   TEMPLATES__ROS2_CONTROL__HARDWARE_PUBLIC
-  hardware_interface::return_type write() override;
+  hardware_interface::return_type write(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
   hardware_interface::return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                                               const std::vector<std::string>& stop_interfaces) override;
