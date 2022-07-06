@@ -118,10 +118,7 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, initial_joint_controllers],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output= "screen",
         condition=IfCondition(use_fake_hardware),
     )
 
@@ -129,10 +126,7 @@ def launch_setup(context, *args, **kwargs):
         package="ur_robot_driver",
         executable="ur_ros2_control_node",
         parameters=[robot_description, initial_joint_controllers],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output= "screen",
         condition=UnlessCondition(use_fake_hardware),
     )
 
@@ -300,7 +294,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="forward_position_controller",
+            default_value="joint_trajectory_controller",
             description="Initially loaded robot controller.",
         )
     )
