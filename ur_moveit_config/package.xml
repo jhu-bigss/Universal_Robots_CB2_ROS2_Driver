@@ -15,12 +15,10 @@
 
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
-  <exec_depend>moveit_ros_move_group</exec_depend>
-  <exec_depend>moveit_servo</exec_depend>
+  <exec_depend>moveit</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>ur_description</exec_depend>
   <exec_depend>urdf</exec_depend>
-  <exec_depend>warehouse_ros_mongo</exec_depend>
   <exec_depend>xacro</exec_depend>
 
   <export>
