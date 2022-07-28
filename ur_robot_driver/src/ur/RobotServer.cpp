@@ -15,27 +15,25 @@
 namespace
 {
 
-// Returns the localhost IP, but first checks to see if an environment variable
-// is declared to specify an IP to use. This is useful when the first IP returned
-// by osaSocket::GetLocalhostIP is not accessible to the UR 5 (as is the case
-// when using the simulator in the VM).
-std::string GetLocalhostIP()
+// Returns the localhost IP, osaSocket::GetLocalhostIP will return
+// a list of available IPs. Use the IP that is in the same network.
+std::string GetLocalhostIP(std::string& ur_network_id)
 {
-  std::string ip_str;
+  int ip_num;  
+  std::vector<std::string> ip_adds;
 
-  char* env_val = getenv("BIGSS_PC_IP");
+  ip_num = osaSocket::GetLocalhostIP(ip_adds);
 
-  if (env_val)
+  for (const auto& ip_add : ip_adds)
   {
-    ip_str = env_val;
-  }
-  else
-  {
-    ip_str = osaSocket::GetLocalhostIP();
+    if ( ip_add.substr(0, ip_add.rfind(".")) == ur_network_id )
+    {
+      // found the local host ip matching the same network
+      return ip_add;
+    }
   }
 
-  // return ip_str;
-  return "192.168.36.1";
+  return 0;
 }
 
 // Replace all instances of key in a src_str with a val string and return the
@@ -258,9 +256,10 @@ void RobotServer::SendDoubleVec(const unsigned long mode, const vctDoubleVec& v,
   SendToURClient(oss.str());
 }
 
-bool RobotServer::ConnectToUR(const std::string& ur_host, unsigned short ur_port)
+bool RobotServer::ConnectToUR(const std::string& ur_ip, unsigned short ur_port)
 {
-  isConnectedToUR = urSocket.Connect(ur_host.c_str(), ur_port);
+  ur_network_id = ur_ip.substr(0, ur_ip.rfind("."));
+  isConnectedToUR = urSocket.Connect(ur_ip.c_str(), ur_port);
   return isConnectedToUR;
 }
 
@@ -296,7 +295,7 @@ void RobotServer::SendProgramToUR(const std::string &program, bool acceptSocket)
 
   // set ip address of the host computer for the robot program
   std::string new_str = ReplaceAll(program, "${HOSTNAME}",
-                                   GetLocalhostIP());
+                                   GetLocalhostIP(ur_network_id));
 
   // set the port of the host RobotServer process for the robot program
   std::stringstream portStream;

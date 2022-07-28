@@ -200,6 +200,8 @@ private:
 
   static void ConvertFrm3ToURPose(const vctFrm3 vct_pose, vctDoubleVec& ur_pose);
 
+  std::string ur_network_id;
+
 };
 
 #endif // ROBOT_SERVER_H
