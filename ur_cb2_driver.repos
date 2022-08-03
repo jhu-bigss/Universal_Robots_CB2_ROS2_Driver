@@ -7,10 +7,6 @@ repositories:
     type: git
     url: git@github.com:jhu-bigss/Universal_Robots_ROS2_Description.git
     version: ros2
-  UR/ur_msgs:
-    type: git
-    url: https://github.com/ros-industrial/ur_msgs.git
-    version: foxy-devel 
   ros2_control: # This is needed for ROS2 Humble
     type: git
     url: https://github.com/ros-controls/ros2_control.git
