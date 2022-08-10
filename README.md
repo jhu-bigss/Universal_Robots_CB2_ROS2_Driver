@@ -7,9 +7,13 @@ You can use the ROS 2 VCS python-based tool (`sudo apt install python3-vcstool`)
 vcs import --input https://raw.githubusercontent.com/jhu-bigss/Universal_Robots_CB2_ROS2_Driver/main/ur_cb2_driver.repos
 ```
 Make sure all the dependencies are met by running:
+
 ```bash
 rosdep install --from-paths src --ignore-src -r -y --skip-keys "reflexxes_type2"
 ```
+
+Make sure fortran is installed in order for `cisstNetlib` to be build. See cisstNetlib [Issue#5](https://github.com/jhu-cisst/cisstNetlib/issues/5#issuecomment-1169452231)
+
 At the root of your ROS 2 workspace, build using:
 ```bash
 colcon build
