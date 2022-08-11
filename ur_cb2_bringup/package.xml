@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ur_bringup</name>
+  <name>ur_cb2_bringup</name>
   <version>0.1.0</version>
   <description>Launch file and run-time configurations, e.g. controllers.</description>
 
@@ -31,7 +31,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros2_controllers_test_nodes</exec_depend>
   <exec_depend>rviz2</exec_depend>
-  <exec_depend>ur_description</exec_depend>
+  <exec_depend>ur_cb2_description</exec_depend>
   <exec_depend>urdf</exec_depend>
   <exec_depend>xacro</exec_depend>
 

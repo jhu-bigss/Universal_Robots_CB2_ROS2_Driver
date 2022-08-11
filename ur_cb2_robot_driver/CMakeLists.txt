@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ur_robot_driver)
+project(ur_cb2_robot_driver)
 
 # add_compile_options(-std=c++11)
 add_compile_options(-Wall)
@@ -42,7 +42,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 add_library(
-  ur_robot_driver_plugin
+  ur_cb2_robot_driver_plugin
   SHARED
   src/hardware_interface.cpp
   src/ur/RobotServer.cpp
@@ -51,7 +51,7 @@ add_library(
   src/ur/bigss_debug_util.cpp
 )
 target_link_libraries(
-  ur_robot_driver_plugin
+  ur_cb2_robot_driver_plugin
   cisstCommon
   cisstVector
   cisstOSAbstraction
@@ -59,17 +59,17 @@ target_link_libraries(
   cisstParameterTypes
 )
 target_include_directories(
-  ur_robot_driver_plugin
+  ur_cb2_robot_driver_plugin
   PRIVATE
   include
 )
 ament_target_dependencies(
-  ur_robot_driver_plugin
+  ur_cb2_robot_driver_plugin
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 # prevent pluginlib from using boost
-target_compile_definitions(ur_robot_driver_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+target_compile_definitions(ur_cb2_robot_driver_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 pluginlib_export_plugin_description_file(
   hardware_interface hardware_interface_plugin.xml)
@@ -92,7 +92,7 @@ install(
 
 # INSTALL
 install(
-  TARGETS ur_robot_driver_plugin
+  TARGETS ur_cb2_robot_driver_plugin
   DESTINATION lib
 )
 install(
@@ -108,7 +108,7 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  ur_robot_driver_plugin
+  ur_cb2_robot_driver_plugin
 )
 ament_export_dependencies(
   hardware_interface

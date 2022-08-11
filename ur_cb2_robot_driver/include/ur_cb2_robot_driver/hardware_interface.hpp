@@ -23,23 +23,23 @@
 #include <bitset>
 
 // ros2_control hw
-#include "ur_robot_driver/visibility_control.h"
+#include "ur_cb2_robot_driver/visibility_control.h"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 
 // UR stuff
-#include "ur_robot_driver/ur/RobotServer.h"
-#include "ur_robot_driver/ur/RobotState.h"
-#include "ur_robot_driver/ur/URDHKinematics.h"
+#include "ur_cb2_robot_driver/ur/RobotServer.h"
+#include "ur_cb2_robot_driver/ur/RobotState.h"
+#include "ur_cb2_robot_driver/ur/URDHKinematics.h"
 
 // ROS
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
-namespace ur_robot_driver
+namespace ur_cb2_robot_driver
 {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -132,7 +132,7 @@ protected:
   rclcpp::Time time_now_;
 };
 
-}  // namespace ur_robot_driver
+}  // namespace ur_cb2_robot_driver
 
 #endif  // UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
 

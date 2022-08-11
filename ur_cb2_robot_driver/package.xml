@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ur_robot_driver</name>
+  <name>ur_cb2_robot_driver</name>
   <version>0.1.0</version>
   <description>ROS2 driver for Universal Robots CB2 controllers based on bigss_util.</description>
 
@@ -36,8 +36,8 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>launch_testing_ament_cmake</depend>
   <depend>ur_msgs</depend>
-  <depend>ur_description</depend>
-  <depend>ur_bringup</depend>
+  <depend>ur_cb2_description</depend>
+  <depend>ur_cb2_bringup</depend>
   <depend>ur_controllers</depend>
   <depend>std_msgs</depend>
   <depend>controller_manager_msgs</depend>

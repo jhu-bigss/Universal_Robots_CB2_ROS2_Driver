@@ -36,7 +36,7 @@ from launch.conditions import IfCondition
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from ur_moveit_config.launch_common import load_yaml
+from ur_cb2_moveit_config.launch_common import load_yaml
 
 
 def launch_setup(context, *args, **kwargs):
@@ -57,7 +57,7 @@ def launch_setup(context, *args, **kwargs):
     launch_servo = LaunchConfiguration("launch_servo")
 
     script_filename = PathJoinSubstitution(
-        [FindPackageShare("ur_robot_driver"), "ur_scripts", "SimpleServer.ur"]
+        [FindPackageShare("ur_cb2_robot_driver"), "ur_scripts", "SimpleServer.ur"]
     )
 
     robot_description_content = Command(
@@ -132,11 +132,11 @@ def launch_setup(context, *args, **kwargs):
             "start_state_max_bounds_error": 0.1,
         }
     }
-    ompl_planning_yaml = load_yaml("ur_moveit_config", "config/ompl_planning.yaml")
+    ompl_planning_yaml = load_yaml("ur_cb2_moveit_config", "config/ompl_planning.yaml")
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
-    controllers_yaml = load_yaml("ur_moveit_config", "config/controllers.yaml")
+    controllers_yaml = load_yaml("ur_cb2_moveit_config", "config/controllers.yaml")
     moveit_controllers = {
         "moveit_simple_controller_manager": controllers_yaml,
         "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
@@ -207,7 +207,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # Servo node for realtime control
-    servo_yaml = load_yaml("ur_moveit_config", "config/ur_servo.yaml")
+    servo_yaml = load_yaml("ur_cb2_moveit_config", "config/ur_servo.yaml")
     servo_params = {"moveit_servo": servo_yaml}
     servo_node = Node(
         package="moveit_servo",
@@ -266,7 +266,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
-            default_value="ur_description",
+            default_value="ur_cb2_description",
             description="Description package with robot URDF/XACRO files. Usually the argument \
         is not set, it enables use of a custom description.",
         )
@@ -281,7 +281,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "moveit_config_package",
-            default_value="ur_moveit_config",
+            default_value="ur_cb2_moveit_config",
             description="MoveIt config package with robot SRDF/XACRO files. Usually the argument \
         is not set, it enables use of a custom moveit config.",
         )

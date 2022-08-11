@@ -1,4 +1,4 @@
-#include "ur_robot_driver/ur/RobotServer.h"
+#include "ur_cb2_robot_driver/ur/RobotServer.h"
 
 #include <cstdlib>
 
@@ -6,9 +6,9 @@
 #include <cisstParameterTypes/prmRobotState.h>
 #include <cisstVector.h>
 
-#include <ur_robot_driver/ur/bigss_debug_util.h>
+#include <ur_cb2_robot_driver/ur/bigss_debug_util.h>
 
-#include "ur_robot_driver/ur/URDHKinematics.h"
+#include "ur_cb2_robot_driver/ur/URDHKinematics.h"
 
 #include "rclcpp/rclcpp.hpp"
 

@@ -60,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
     headless_mode = LaunchConfiguration("headless_mode")
 
     script_filename = PathJoinSubstitution(
-        [FindPackageShare("ur_robot_driver"), "ur_scripts", "SimpleServer.ur"]
+        [FindPackageShare("ur_cb2_robot_driver"), "ur_scripts", "SimpleServer.ur"]
     )
 
     robot_description_content = Command(
@@ -123,7 +123,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     ur_control_node = Node(
-        package="ur_robot_driver",
+        package="ur_cb2_robot_driver",
         executable="ur_ros2_control_node",
         parameters=[robot_description, initial_joint_controllers],
         output= "screen",
@@ -233,7 +233,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "runtime_config_package",
-            default_value="ur_bringup",
+            default_value="ur_cb2_bringup",
             description='Package with the controller\'s configuration in "config" folder. \
         Usually the argument is not set, it enables use of a custom setup.',
         )
@@ -248,7 +248,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
-            default_value="ur_description",
+            default_value="ur_cb2_description",
             description="Description package with robot URDF/XACRO files. Usually the argument \
         is not set, it enables use of a custom description.",
         )

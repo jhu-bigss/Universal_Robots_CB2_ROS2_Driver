@@ -16,10 +16,10 @@
 #include <limits>
 #include <vector>
 
-#include "ur_robot_driver/hardware_interface.hpp"
+#include "ur_cb2_robot_driver/hardware_interface.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 
-namespace ur_robot_driver
+namespace ur_cb2_robot_driver
 {
 CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::HardwareInfo & info)
 {
@@ -381,9 +381,9 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
 
   return ret_val;
 }
-}  // namespace ur_robot_driver
+}  // namespace ur_cb2_robot_driver
 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  ur_robot_driver::URPositionHardwareInterface, hardware_interface::SystemInterface)
+  ur_cb2_robot_driver::URPositionHardwareInterface, hardware_interface::SystemInterface)

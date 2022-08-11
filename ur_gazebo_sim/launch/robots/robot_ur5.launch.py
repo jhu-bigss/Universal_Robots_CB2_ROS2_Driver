@@ -18,7 +18,7 @@ def generate_launch_description() -> LaunchDescription:
 
     # Get substitution for all arguments
     robot_sdf_path = PathJoinSubstitution([
-                        FindPackageShare("ur_description"),
+                        FindPackageShare("ur_cb2_description"),
                         "sdf",
                         "ur5.sdf",
                     ])

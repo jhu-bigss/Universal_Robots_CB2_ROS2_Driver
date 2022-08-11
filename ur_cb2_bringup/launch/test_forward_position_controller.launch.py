@@ -40,7 +40,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
 
     position_goals = PathJoinSubstitution(
-        [FindPackageShare("ur_bringup"), "config", "test_goal_publishers_config.yaml"]
+        [FindPackageShare("ur_cb2_bringup"), "config", "test_goal_publishers_config.yaml"]
     )
 
     return LaunchDescription(

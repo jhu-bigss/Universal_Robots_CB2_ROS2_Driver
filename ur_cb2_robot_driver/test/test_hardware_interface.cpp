@@ -31,7 +31,7 @@ protected:
       R"(
         <ros2_control name="URPositionHardwareInterface2dof" type="system">
           <hardware>
-            <plugin>ur_robot_driver/URPositionHardwareInterface</plugin>
+            <plugin>ur_cb2_robot_driver/URPositionHardwareInterface</plugin>
           </hardware>
           <joint name="joint1">
             <command_interface name="position"/>

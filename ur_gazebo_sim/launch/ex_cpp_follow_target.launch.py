@@ -135,7 +135,7 @@ def generate_declared_arguments() -> List[DeclareLaunchArgument]:
         # Locations of robot resources
         DeclareLaunchArgument(
             "description_package",
-            default_value="ur_description",
+            default_value="ur_cb2_description",
             description="Robot description package.",
         ),
         DeclareLaunchArgument(

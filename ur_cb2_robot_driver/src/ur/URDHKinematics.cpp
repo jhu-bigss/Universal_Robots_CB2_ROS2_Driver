@@ -1,5 +1,5 @@
-#include "ur_robot_driver/ur/URDHKinematics.h"
-#include "ur_robot_driver/ur/URDHParams.h"
+#include "ur_cb2_robot_driver/ur/URDHKinematics.h"
+#include "ur_cb2_robot_driver/ur/URDHParams.h"
 #include <cmath>
 
 const double PI = 3.14159265359;
