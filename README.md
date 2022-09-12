@@ -24,5 +24,10 @@ Once the code is compiled, you can launch the driver using:
 ros2 launch ur_cb2_bringup ur_control.launch.py ur_type:=<UR_TYPE> robot_ip:=<IP_OF_THE_ROBOT>
 ```
 
+Now you can launch the MoveIt2 to plan the robot's motion:
+```bash
+ros2 launch ur_cb2_moveit_config ur_moveit.launch.py ur_type:=<UR_TYPE>
+```
+
 ## Install URSim 1.8.16941
 Dowload [URSIM 1.8.16941](https://www.universal-robots.com/download/software-cb-series/simulator-non-linux/offline-simulator-cb-series-non-linux-ursim-1816941/) and run it on a virtual machine. Open a terminal and run `ifconfig`, then you should see the robot's IP.
