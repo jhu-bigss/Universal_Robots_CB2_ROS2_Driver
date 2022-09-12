@@ -1,0 +1,35 @@
+#
+# Author(s):  Anton Deguet, Henry Phalen
+# Created on: 2021-10-12
+#
+# (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
+#
+
+set (bigssConstraintController_VERSION_MAJOR "@bigssConstraintController_VERSION_MAJOR@")
+set (bigssConstraintController_VERSION_MINOR "@bigssConstraintController_VERSION_MINOR@")
+set (bigssConstraintController_VERSION_PATCH "@bigssConstraintController_VERSION_PATCH@")
+set (bigssConstraintController_VERSION "@bigssConstraintController_VERSION@")
+
+# figure out if this file is where it was configured (build tree) or
+# not (installed tree)
+set (bigssConstraintController_CMAKE_CONFIG_FILE "@bigssConstraintController_CMAKE_CONFIG_FILE@")
+get_filename_component (THIS_FILE_PATH
+                        ${CMAKE_CURRENT_LIST_FILE}
+                        REALPATH)
+
+if ("${bigssConstraintController_CMAKE_CONFIG_FILE}" STREQUAL "${THIS_FILE_PATH}")
+  # we're using the build directories
+  set (bigssConstraintController_INCLUDE_DIR "@bigssConstraintController_INCLUDE_DIR@")
+  set (bigssConstraintController_LIBRARY_DIR "@bigssConstraintController_LIBRARY_DIR@")
+else ()
+  # try to find the install dir, we know the install is using
+  # share/bigssConstraintController so we can go ../..
+  set (RELATIVE_INSTALL_DIR "${THIS_FILE_PATH}/../..")
+  get_filename_component (ABSOLUTE_INSTALL_DIR "${RELATIVE_INSTALL_DIR}" ABSOLUTE)
+  # set directories using the install dir
+  set (bigssConstraintController_INCLUDE_DIR "${ABSOLUTE_INSTALL_DIR}/include")
+  set (bigssConstraintController_LIBRARY_DIR "${ABSOLUTE_INSTALL_DIR}/lib")
+endif ()
+
+set (bigssConstraintController_LIBRARIES   "@bigssConstraintController_LIBRARIES@")
+
