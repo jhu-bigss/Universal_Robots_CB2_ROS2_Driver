@@ -27,13 +27,11 @@ find_package(cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
     cisst_find_saw_component (sawConstraintController REQUIRED)
     find_package(sawConstraintController REQUIRED)
     include_directories(${sawConstraintController_INCLUDE_DIR})
-    include_directories(${sawConstraintController_HEADER_DIR})
     link_directories(${sawConstraintController_LIBRARY_DIR})
 
     cisst_find_saw_component (ur_cb2_bigss_constraint_controller REQUIRED)
     find_package(ur_cb2_bigss_constraint_controller REQUIRED)
     include_directories(${ur_cb2_bigss_constraint_controller_INCLUDE_DIR})
-    include_directories(${ur_cb2_bigss_constraint_controller_HEADER_DIR})
     link_directories(${ur_cb2_bigss_constraint_controller_LIBRARY_DIR})
 
 

@@ -24,32 +24,19 @@ if(cisst_FOUND_AS_REQUIRED)
     # load cisst configuration
     include(${CISST_USE_FILE})
 
+    # cisst_find_saw_component (sawConstraintController REQUIRED)
     find_package(sawConstraintController REQUIRED)
 
+    # fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
+    string(REPLACE "/share" "" sawConstraintController_INCLUDE_DIR ${sawConstraintController_INCLUDE_DIR})
+    string(REPLACE "/share" "" sawConstraintController_LIBRARY_DIR ${sawConstraintController_LIBRARY_DIR})
+
     include_directories(
-        ${ur_cb2_bigss_constraint_controller_SOURCE_DIR}
-        ${ur_cb2_bigss_constraint_controller_INCLUDE_DIR}
+        include
         ${sawConstraintController_INCLUDE_DIR}
         )
-
     link_directories(
         ${sawConstraintController_LIBRARY_DIR}
-    )
-
-    set(ur_cb2_bigss_constraint_controller_HEADER_DIR "include/ur_cb2_bigss_constraint_controller")
-
-    set(HEADER_FILES
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/helper.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsBIGSSVFConfig.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsBIGSSVFController.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsBIGSSVFRCM.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFAbsoluteJointLimits.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFFixOrientation.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFFollowPositionTrajectory.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFFollowSettlingGains.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFJointPenalty.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFJointVelLimits.h
-        ${ur_cb2_bigss_constraint_controller_HEADER_DIR}/mtsVFStayOnAxis.h
     )
 
     set(SOURCE_FILES
@@ -67,24 +54,24 @@ if(cisst_FOUND_AS_REQUIRED)
     )
 
     add_library(ur_cb2_bigss_constraint_controller
-        ${HEADER_FILES}
         ${SOURCE_FILES}
     )
-
-    target_link_libraries(
+    ament_target_dependencies(
         ur_cb2_bigss_constraint_controller
-        ${sawConstraintController_LIBRARIES}
+        sawConstraintController
     )
-
-    set_property(TARGET ur_cb2_bigss_constraint_controller PROPERTY FOLDER "ur_cb2_bigss_constraint_controller")
     cisst_target_link_libraries(ur_cb2_bigss_constraint_controller ${REQUIRED_CISST_LIBRARIES} ${cisstConstraintController_LIBRARIES})
 
-    # Install targets for headers and library
-    install(DIRECTORY
-        "${ur_cb2_bigss_constraint_controller_SOURCE_DIR}/include/ur_cb2_bigss_constraint_controller"
-        "${ur_cb2_bigss_constraint_controller_BINARY_DIR}/include/ur_cb2_bigss_constraint_controller"
+    ament_export_include_directories(include)
+    ament_export_libraries(ur_cb2_bigss_constraint_controller)
+
+    set_property(TARGET ur_cb2_bigss_constraint_controller PROPERTY FOLDER "ur_cb2_bigss_constraint_controller")
+
+    install(
+        DIRECTORY include/
         DESTINATION include
-        PATTERN .svn EXCLUDE)
+        PATTERN .svn EXCLUDE
+    )
 
     install(TARGETS ur_cb2_bigss_constraint_controller
         RUNTIME DESTINATION bin
