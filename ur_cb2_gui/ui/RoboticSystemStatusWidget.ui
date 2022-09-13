@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>demoStatusWidget</class>
+ <widget class="QWidget" name="demoStatusWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>884</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Status</string>
+  </property>
+  <layout class="QGridLayout" name="demoStatusFormLayout">
+   <item row="10" column="3">
+    <widget class="QLabel" name="fkYLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="2">
+    <widget class="QLabel" name="polarisBaseXLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="4">
+    <widget class="QLabel" name="tipZLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="5">
+    <widget class="QLabel" name="tipRMSTextLabel">
+     <property name="text">
+      <string>Ground Truth RMS:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="3">
+    <widget class="QLabel" name="tipYLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="4">
+    <widget class="QLabel" name="fbgZLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="2">
+    <widget class="QLabel" name="tipXLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="4">
+    <widget class="QLabel" name="fkZLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2" colspan="2">
+    <layout class="QHBoxLayout" name="commandedVelocitiesLayout">
+     <item>
+      <widget class="QLabel" name="commandedVelocity0Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocity1Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocity2Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocity3Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocity4Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocity5Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="10" column="5">
+    <widget class="QLabel" name="fkRMSTextLabel">
+     <property name="text">
+      <string>FK RMS:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="5">
+    <widget class="QLabel" name="polarisBaseRMSTextLabel">
+     <property name="text">
+      <string>Debug Tip RMS:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="6">
+    <widget class="QLabel" name="fkRMSLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="6">
+    <widget class="QLabel" name="polarisBaseRMSLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="polarisTipTextLabel">
+     <property name="text">
+      <string>Polaris Tip:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="commandFilteredLabel">
+     <property name="text">
+      <string>Filtered Commanded Velocity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="2">
+    <widget class="QLabel" name="fkXLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="fkTextLabel">
+     <property name="text">
+      <string>FK Base:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="5">
+    <widget class="QLabel" name="polarisTipRMSTextLabel">
+     <property name="text">
+      <string>Measurement RMS:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="4">
+    <widget class="QLabel" name="polarisBaseZLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="6">
+    <widget class="QLabel" name="polarisTipRMSLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="3">
+    <widget class="QLabel" name="polarisBaseYLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2" colspan="2">
+    <layout class="QHBoxLayout" name="stateLayout">
+     <item>
+      <widget class="QLabel" name="state0Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="state1Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="state2Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="state3Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="state4Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="state5Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="polarisBaseTextLabel">
+     <property name="text">
+      <string>Polaris Base:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="fbgTextLabel">
+     <property name="text">
+      <string>FBG Tip:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="2">
+    <widget class="QLabel" name="fbgXLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3">
+    <widget class="QLabel" name="fbgYLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="6">
+    <widget class="QLabel" name="tipRMSLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLabel" name="distanceLabel">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="statusTextLabel">
+     <property name="text">
+      <string>Controller Status:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="stateLabel">
+     <property name="text">
+      <string>Joint State:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="2">
+    <widget class="QLabel" name="polarisTipXLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2" colspan="2">
+    <layout class="QHBoxLayout" name="commandedVelocitiesFilteredLayout">
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered0Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered1Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered2Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered3Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered4Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="commandedVelocityFiltered5Label">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="8" column="3">
+    <widget class="QLabel" name="polarisTipYLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="statusLabel">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="4">
+    <widget class="QLabel" name="polarisTipZLabel">
+     <property name="text">
+      <string>0.0000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="goalTextLabel">
+     <property name="text">
+      <string>Current Goal:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="currentTipTextLabel">
+     <property name="text">
+      <string>Current Measured Tip:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="commandLabel">
+     <property name="text">
+      <string>Commanded Velocity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="distanceTextLabel">
+     <property name="text">
+      <string>Distance:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QCheckBox" name="printProblemBox">
+     <property name="text">
+      <string>Print Problem?</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="tipTextLabel">
+     <property name="text">
+      <string>Ground Truth:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2">
+    <layout class="QHBoxLayout" name="currentGoal">
+     <item>
+      <widget class="QLabel" name="currentGoal0">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentGoal1">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentGoal2">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentGoal3">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentGoal4">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentGoal5">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="2" colspan="2">
+    <layout class="QHBoxLayout" name="currentMeasuredTip">
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip0">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip1">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip2">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip3">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip4">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentMeasuredTip5">
+       <property name="text">
+        <string>0.0000</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

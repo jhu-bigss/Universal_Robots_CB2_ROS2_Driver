@@ -11,12 +11,13 @@ find_package(ament_cmake REQUIRED)
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon
      cisstVector
+     cisstVectorQt
      cisstOSAbstraction
      cisstMultiTask
+     cisstMultiTaskQt
      cisstParameterTypes
-     cisstRobot
-     cisstNumerical
-     )
+     cisstParameterTypesQt
+     cisstQt)
 
 find_package(cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
@@ -24,16 +25,41 @@ find_package(cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
     # load cisst configuration
     include (${CISST_USE_FILE})
 
-    cisst_find_saw_component (sawConstraintController REQUIRED)
-    find_package(sawConstraintController REQUIRED)
-    include_directories(${sawConstraintController_INCLUDE_DIR})
-    link_directories(${sawConstraintController_LIBRARY_DIR})
-
     cisst_find_saw_component (ur_cb2_bigss_constraint_controller REQUIRED)
     find_package(ur_cb2_bigss_constraint_controller REQUIRED)
     include_directories(${ur_cb2_bigss_constraint_controller_INCLUDE_DIR})
     link_directories(${ur_cb2_bigss_constraint_controller_LIBRARY_DIR})
 
+    include_directories(
+        include
+        ${ur_cb2_bigss_constraint_controller_INCLUDE_DIR}
+        )
+    link_directories(
+        ${ur_cb2_bigss_constraint_controller_LIBRARY_DIR}
+    )
+
+    set(SOURCE_FILES
+      RoboticSystemInputsWidget.cxx
+      RoboticSystemConstraintsWidget.cxx
+      RoboticSystemControlWidget.cxx
+      RoboticSystemStatusWidget.cxx
+      # RoboticSystemLoggingWidget.cxx
+      RoboticSystemWidget.cxx
+    )
+
+    add_library(ur_cb2_gui
+      ${SOURCE_FILES} 
+    )
+    ament_target_dependencies(ur_cb2_gui
+      ${REQUIRED_CISST_LIBRARIES}
+    )
+
+    set (ur_cb2_gui_LIBRARIES ur_cb2_gui PARENT_SCOPE)
+
+    install (TARGETS ur_cb2_gui COMPONENT ur_cb2_gui
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
 
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
