@@ -10,7 +10,7 @@ Jp is the 'positional' jacobian at the point of interest, i.e. [linear_velocity 
 v_des is the desired incremental velocity of the end effector over the next time step
 */
 
-#include <ur_cb2_bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
+#include <bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
 
 void mtsVFFollowPositionTrajectory::FillInTableauRefs(const CONTROLLERMODE mode, const double TickTime)
 {

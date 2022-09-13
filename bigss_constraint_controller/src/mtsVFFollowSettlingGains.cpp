@@ -16,7 +16,7 @@
  --- end cisst license ---
  */
 
-#include <ur_cb2_bigss_constraint_controller/mtsVFFollowSettlingGains.h>
+#include <bigss_constraint_controller/mtsVFFollowSettlingGains.h>
 #include <cisstCommon/cmnUnits.h>
 //! Updates co with virtual fixture data.
 /*! FillInTableauRefs

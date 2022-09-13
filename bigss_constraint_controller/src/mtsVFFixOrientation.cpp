@@ -18,8 +18,8 @@ R is the orientation of the frame of interest relative to the base frame, R_goal
 invsk denotes the 'vec' operator, that does the opposite of the 'skew' operator
 */
 
-#include <ur_cb2_bigss_constraint_controller/mtsVFFixOrientation.h>
-#include <ur_cb2_bigss_constraint_controller/helper.h>
+#include <bigss_constraint_controller/mtsVFFixOrientation.h>
+#include <bigss_constraint_controller/helper.h>
 
 void mtsVFFixOrientation::FillInTableauRefs(const CONTROLLERMODE mode, const double TickTime)
 { 

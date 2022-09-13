@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ur_cb2_gui)
+project(bigss_robotic_system)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,26 +7,15 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-# Turn on automatic invocation of the MOC, UIC & RCC
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-
-# Find the QtWidgets library
-find_package(Qt5Widgets REQUIRED)
-
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon
      cisstVector
-     cisstVectorQt
      cisstOSAbstraction
      cisstMultiTask
-     cisstMultiTaskQt
      cisstParameterTypes
-     cisstParameterTypesQt
-     cisstQt
      cisstRobot
-     cisstNumerical)
+     cisstNumerical
+     )
 
 find_package(cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
@@ -35,14 +24,11 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   find_package(sawConstraintController REQUIRED)
+  find_package(bigss_constraint_controller REQUIRED)
 
   # fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
   string(REPLACE "/share" "" sawConstraintController_INCLUDE_DIR ${sawConstraintController_INCLUDE_DIR})
   string(REPLACE "/share" "" sawConstraintController_LIBRARY_DIR ${sawConstraintController_LIBRARY_DIR})
-
-  find_package(bigss_constraint_controller REQUIRED)
-
-  find_package(bigss_robotic_system REQUIRED)
 
   include_directories(
       include
@@ -54,34 +40,36 @@ if (cisst_FOUND_AS_REQUIRED)
     )
 
   set(SOURCE_FILES
-    src/RoboticSystemInputsWidget.cxx
-    src/RoboticSystemConstraintsWidget.cxx
-    src/RoboticSystemControlWidget.cxx
-    src/RoboticSystemStatusWidget.cxx
-    # src/RoboticSystemLoggingWidget.cxx
-    src/RoboticSystemWidget.cxx
+    src/KinematicsObject.cpp
+    src/mtsSARobSysTask.cpp
+    src/RobotInterfaceObject.cpp
+    src/SensorInterface.cpp
+    src/SeriallyAttachedRoboticSystem.cpp
   )
 
-  set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
-
-  add_library(ur_cb2_gui
+  add_library(bigss_robotic_system
     ${SOURCE_FILES} 
-    ${UI_FILES}
   )
-  ament_target_dependencies(ur_cb2_gui
+  ament_target_dependencies(bigss_robotic_system
     cisst
-    Qt5Widgets
     sawConstraintController
     bigss_constraint_controller
-    bigss_robotic_system
   )
 
-  ament_export_libraries(ur_cb2_gui)
+  ament_export_include_directories(include)
+  ament_export_libraries(bigss_robotic_system)
 
-  install (TARGETS ur_cb2_gui COMPONENT ur_cb2_gui
-          RUNTIME DESTINATION bin
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib)
+  set_property(TARGET bigss_robotic_system PROPERTY FOLDER "bigss_robotic_system")
+
+  install(
+      DIRECTORY include/
+      DESTINATION include
+  )
+
+  install(TARGETS bigss_robotic_system
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

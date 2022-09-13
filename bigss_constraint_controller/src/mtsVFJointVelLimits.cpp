@@ -12,7 +12,7 @@
  --- end cisst license ---
  */
 
-#include <ur_cb2_bigss_constraint_controller/mtsVFJointVelLimits.h>
+#include <bigss_constraint_controller/mtsVFJointVelLimits.h>
 
 //! Updates co with virtual fixture data.
 /*! FillInTableauRefs

@@ -17,14 +17,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <sawConstraintController/mtsVFController.h>
 #include <sawConstraintController/mtsVFBase.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFAbsoluteJointLimits.h>
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFRCM.h>
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFController.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFJointPenalty.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFStayOnAxis.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFFixOrientation.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFJointVelLimits.h>
+#include <bigss_constraint_controller/mtsVFAbsoluteJointLimits.h>
+#include <bigss_constraint_controller/mtsBIGSSVFRCM.h>
+#include <bigss_constraint_controller/mtsBIGSSVFController.h>
+#include <bigss_constraint_controller/mtsVFJointPenalty.h>
+#include <bigss_constraint_controller/mtsVFStayOnAxis.h>
+#include <bigss_constraint_controller/mtsVFFixOrientation.h>
+#include <bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
+#include <bigss_constraint_controller/mtsVFJointVelLimits.h>
 
 
 mtsBIGSSVFController::mtsBIGSSVFController(size_t numJoints, mtsVFBase::CONTROLLERMODE mode) :

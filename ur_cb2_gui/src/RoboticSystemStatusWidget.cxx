@@ -1,9 +1,9 @@
 
-#include <bigssRoboticSystem/RoboticSystemStatusWidget.h>
+#include <ur_cb2_gui/RoboticSystemStatusWidget.h>
 
-#include <bigssRoboticSystem/ui_RoboticSystemStatusWidget.h>
+#include <ur_cb2_gui/ui_RoboticSystemStatusWidget.h>
 
-#include <bigssRoboticSystem/mtsSARobSysTask.h>
+#include <bigss_robotic_system/mtsSARobSysTask.h>
 
 #include <QDoubleSpinBox>
 #include <QFormLayout>

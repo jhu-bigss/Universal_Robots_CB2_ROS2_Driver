@@ -1,4 +1,4 @@
-#include <bigssRoboticSystem/RoboticSystemConstraintsWidget.h>
+#include <ur_cb2_gui/RoboticSystemConstraintsWidget.h>
 
 #include <QLabel>
 #include <QDoubleSpinBox>
@@ -7,7 +7,7 @@
 
 //#include <ctkPathLineEdit.h>
 
-#include <bigssRoboticSystem/ui_RoboticSystemConstraintsWidget.h>
+#include <ur_cb2_gui/ui_RoboticSystemConstraintsWidget.h>
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>

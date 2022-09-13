@@ -2,7 +2,7 @@
   Authors: Henry Phalen
 */
 
-#include <ur_cb2_bigss_constraint_controller/helper.h>
+#include <bigss_constraint_controller/helper.h>
 
 // vct3 GetClosestPointToGivenPointOnLine(vct3 givenPt, vct3 linePoint, vct3 lineD);
 

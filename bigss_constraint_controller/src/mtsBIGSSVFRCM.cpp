@@ -1,5 +1,5 @@
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFRCM.h>
-#include <ur_cb2_bigss_constraint_controller/helper.h>
+#include <bigss_constraint_controller/mtsBIGSSVFRCM.h>
+#include <bigss_constraint_controller/helper.h>
 
 CMN_IMPLEMENT_SERVICES(mtsBIGSSVFRCM);
 

@@ -5,7 +5,7 @@
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <sawConstraintController/mtsVFDataBase.h>
 #include <sawConstraintController/prmKinematicsState.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFFollowSettlingGains.h>
+#include <bigss_constraint_controller/mtsVFFollowSettlingGains.h>
 
 class mtsVFFollowPositionTrajectory : public mtsVFBase
 {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ur_cb2_bigss_constraint_controller)
+project(bigss_constraint_controller)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -24,7 +24,6 @@ if(cisst_FOUND_AS_REQUIRED)
     # load cisst configuration
     include(${CISST_USE_FILE})
 
-    # cisst_find_saw_component (sawConstraintController REQUIRED)
     find_package(sawConstraintController REQUIRED)
 
     # fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
@@ -53,19 +52,19 @@ if(cisst_FOUND_AS_REQUIRED)
         src/mtsVFStayOnAxis.cpp
     )
 
-    add_library(ur_cb2_bigss_constraint_controller
+    add_library(bigss_constraint_controller
         ${SOURCE_FILES}
     )
     ament_target_dependencies(
-        ur_cb2_bigss_constraint_controller
+        bigss_constraint_controller
         sawConstraintController
     )
-    cisst_target_link_libraries(ur_cb2_bigss_constraint_controller ${REQUIRED_CISST_LIBRARIES} ${cisstConstraintController_LIBRARIES})
+    # cisst_target_link_libraries(bigss_constraint_controller ${REQUIRED_CISST_LIBRARIES} ${cisstConstraintController_LIBRARIES})
 
     ament_export_include_directories(include)
-    ament_export_libraries(ur_cb2_bigss_constraint_controller)
+    ament_export_libraries(bigss_constraint_controller)
 
-    set_property(TARGET ur_cb2_bigss_constraint_controller PROPERTY FOLDER "ur_cb2_bigss_constraint_controller")
+    set_property(TARGET bigss_constraint_controller PROPERTY FOLDER "bigss_constraint_controller")
 
     install(
         DIRECTORY include/
@@ -73,7 +72,7 @@ if(cisst_FOUND_AS_REQUIRED)
         PATTERN .svn EXCLUDE
     )
 
-    install(TARGETS ur_cb2_bigss_constraint_controller
+    install(TARGETS bigss_constraint_controller
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

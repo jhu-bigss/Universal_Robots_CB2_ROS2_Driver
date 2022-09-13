@@ -1,4 +1,4 @@
-#include <bigssRoboticSystem/RoboticSystemInputsWidget.h>
+#include <ur_cb2_gui/RoboticSystemInputsWidget.h>
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QtGui>

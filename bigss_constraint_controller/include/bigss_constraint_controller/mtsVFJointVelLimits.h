@@ -23,7 +23,7 @@
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <sawConstraintController/mtsVFDataBase.h>
 #include <sawConstraintController/mtsVFBase.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFAbsoluteJointLimits.h>
+#include <bigss_constraint_controller/mtsVFAbsoluteJointLimits.h>
 
 /*! \brief mtsVFAbsoluteJointLimits: A class that contains logic for the implementation of joint velocity limits
  */

@@ -18,8 +18,8 @@ p_curr is the current position of the point in 3D space
 p_axis and v_axis define a line/axis in 3D space using a point p and direction vector v
 */
 
-#include <ur_cb2_bigss_constraint_controller/mtsVFStayOnAxis.h>
-#include <ur_cb2_bigss_constraint_controller/helper.h>
+#include <bigss_constraint_controller/mtsVFStayOnAxis.h>
+#include <bigss_constraint_controller/helper.h>
 
 void mtsVFStayOnAxis::FillInTableauRefs(const CONTROLLERMODE mode, const double TickTime)
 { 

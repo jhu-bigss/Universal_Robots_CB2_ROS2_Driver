@@ -4,13 +4,13 @@
 #include <cisstCommon/cmnConstants.h>
 #include <cisstVector.h>
 
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFConfig.h>
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFController.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFStayOnAxis.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFFixOrientation.h>
-#include <ur_cb2_bigss_constraint_controller/mtsBIGSSVFRCM.h>
-#include <ur_cb2_bigss_constraint_controller/mtsVFJointPenalty.h>
+#include <bigss_constraint_controller/mtsBIGSSVFConfig.h>
+#include <bigss_constraint_controller/mtsBIGSSVFController.h>
+#include <bigss_constraint_controller/mtsVFStayOnAxis.h>
+#include <bigss_constraint_controller/mtsVFFollowPositionTrajectory.h>
+#include <bigss_constraint_controller/mtsVFFixOrientation.h>
+#include <bigss_constraint_controller/mtsBIGSSVFRCM.h>
+#include <bigss_constraint_controller/mtsVFJointPenalty.h>
 
 // TODO: Need a large-scale simplification of this, constraints really should be a single type and configure themselves, etc.
 

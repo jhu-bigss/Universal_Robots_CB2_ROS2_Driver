@@ -1,5 +1,5 @@
 
-#include <bigssRoboticSystem/RoboticSystemControlWidget.h>
+#include <ur_cb2_gui/RoboticSystemControlWidget.h>
 
 #include <QFormLayout>
 #include <QPushButton>
@@ -10,9 +10,9 @@
 
 //#include <ctkSliderWidget.h>
 
-#include <bigssRoboticSystem/ui_RoboticSystemControlWidget.h>
+#include <ur_cb2_gui/ui_RoboticSystemControlWidget.h>
 
-#include <bigssRoboticSystem/mtsSARobSysTask.h>
+#include <bigss_robotic_system/mtsSARobSysTask.h>
 
 // #include <bigssMath/slicerUtil.h>
 
