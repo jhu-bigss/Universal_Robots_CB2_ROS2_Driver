@@ -17,3 +17,7 @@ repositories:
     type: git
     url: git@github.com:jhu-cisst/cisstNetlib
     version: devel
+  cisst-saw/sawConstraintController:
+    type: git
+    url: git@github.com:jhu-saw/sawConstraintController.git
+    version: devel
