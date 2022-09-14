@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>bigss_spine_robot_control</name>
+  <version>0.1.0</version>
+  <description>BIGSS spine robot control</description>
+  <maintainer email="liushuya7@gmail.com">Joshua Liu</maintainer>
+  <license>cisst</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>cisst</depend>
+  <depend>cisst_ros2_bridge</depend>
+  <depend>cisst_ros2_crtk</depend>
+  <depend>sawConstraintController</depend>
+  <depend>bigss_constraint_controller</depend>
+  <depend>bigss_robotic_system</depend>
+  <depend>ur_cb2_gui</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

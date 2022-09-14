@@ -17,6 +17,23 @@ repositories:
     type: git
     url: git@github.com:jhu-cisst/cisstNetlib
     version: devel
+   cisst-saw/cisst_msgs:
+    type: git
+    url: git@github.com:jhu-cisst/ros2_cisst_msgs.git
+    version: main
+  cisst-saw/cisst_ros2_bridge:
+    type: git
+    url: git@github.com:jhu-cisst/cisst_ros2_bridge.git
+    version: main
+  crtk/crtk_msgs:
+    type: git
+    url: git@github.com:collaborative-robotics/ros2_crtk_msgs.git
+    version: main
+  cisst-saw/cisst_ros2_crtk:
+    type: git
+    url: git@github.com:jhu-cisst/cisst_ros2_crtk.git
+    version: main
+  # cisst saw components
   cisst-saw/sawConstraintController:
     type: git
     url: git@github.com:jhu-saw/sawConstraintController.git

@@ -76,7 +76,14 @@ if (cisst_FOUND_AS_REQUIRED)
     bigss_robotic_system
   )
 
+  ament_export_include_directories(include)
   ament_export_libraries(ur_cb2_gui)
+
+
+  install(
+      DIRECTORY include/
+      DESTINATION include
+  )
 
   install (TARGETS ur_cb2_gui COMPONENT ur_cb2_gui
           RUNTIME DESTINATION bin
