@@ -58,7 +58,6 @@ def generate_launch_description():
             default_value="joint_trajectory_controller",
             description="Initially loaded robot controller.",
             choices=[
-                "scaled_joint_trajectory_controller",
                 "joint_trajectory_controller",
                 "forward_velocity_controller",
                 "forward_position_controller",
