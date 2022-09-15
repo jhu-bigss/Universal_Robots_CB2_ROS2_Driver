@@ -21,14 +21,10 @@ set(REQUIRED_CISST_LIBRARIES
 find_package(cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if(cisst_FOUND_AS_REQUIRED)
-    # load cisst configuration
+
     include(${CISST_USE_FILE})
 
     find_package(sawConstraintController REQUIRED)
-
-    # fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
-    string(REPLACE "/share" "" sawConstraintController_INCLUDE_DIR ${sawConstraintController_INCLUDE_DIR})
-    string(REPLACE "/share" "" sawConstraintController_LIBRARY_DIR ${sawConstraintController_LIBRARY_DIR})
 
     include_directories(
         include
@@ -59,7 +55,6 @@ if(cisst_FOUND_AS_REQUIRED)
         bigss_constraint_controller
         sawConstraintController
     )
-    # cisst_target_link_libraries(bigss_constraint_controller ${REQUIRED_CISST_LIBRARIES} ${cisstConstraintController_LIBRARIES})
 
     ament_export_include_directories(include)
     ament_export_libraries(bigss_constraint_controller)
@@ -79,12 +74,7 @@ if(cisst_FOUND_AS_REQUIRED)
 
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
-    # the following line skips the linter which checks for copyrights
-    # comment the line when a copyright and license is added to all source files
     set(ament_cmake_copyright_FOUND TRUE)
-    # the following line skips cpplint (only works in a git repo)
-    # comment the line when this package is in a git repo and when
-    # a copyright and license is added to all source files
     set(ament_cmake_cpplint_FOUND TRUE)
     ament_lint_auto_find_test_dependencies()
   endif()
@@ -94,5 +84,3 @@ if(cisst_FOUND_AS_REQUIRED)
 else(cisst_FOUND_AS_REQUIRED)
     message("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif(cisst_FOUND_AS_REQUIRED)
-
-

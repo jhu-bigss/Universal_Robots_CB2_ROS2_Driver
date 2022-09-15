@@ -11,7 +11,7 @@
 
   <depend>cisst</depend>
   <depend>cisstNetlib</depend>
-  <depend>sawConstraintController</depend>
+  <depend>sawConstraintControllerAll</depend>
   <depend>bigss_constraint_controller</depend>
   <depend>bigss_robotic_system</depend>
 

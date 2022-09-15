@@ -35,13 +35,7 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   find_package(sawConstraintController REQUIRED)
-
-  # fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
-  string(REPLACE "/share" "" sawConstraintController_INCLUDE_DIR ${sawConstraintController_INCLUDE_DIR})
-  string(REPLACE "/share" "" sawConstraintController_LIBRARY_DIR ${sawConstraintController_LIBRARY_DIR})
-
   find_package(bigss_constraint_controller REQUIRED)
-
   find_package(bigss_robotic_system REQUIRED)
 
   include_directories(
@@ -79,7 +73,6 @@ if (cisst_FOUND_AS_REQUIRED)
   ament_export_include_directories(include)
   ament_export_libraries(ur_cb2_gui)
 
-
   install(
       DIRECTORY include/
       DESTINATION include
@@ -92,12 +85,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
