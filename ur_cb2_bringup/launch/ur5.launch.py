@@ -28,6 +28,7 @@
 
 #
 # Author: Denis Stogl
+# Modified by: Joshua Liu
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
@@ -42,13 +43,6 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "robot_ip",
             description="IP address by which the robot can be reached.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "sim",
-            default_value="false",
-            description="Start gazebo simulation.",
         )
     )
     declared_arguments.append(
@@ -81,7 +75,6 @@ def generate_launch_description():
 
     # Initialize Arguments
     robot_ip = LaunchConfiguration("robot_ip")
-    sim = LaunchConfiguration("sim")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
     activate_joint_controller = LaunchConfiguration("activate_joint_controller")
@@ -90,7 +83,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([ThisLaunchFileDir(), "/ur_control.launch.py"]),
         launch_arguments={
             "ur_type": "ur5",
-            "sim": sim,
             "robot_ip": robot_ip,
             "use_fake_hardware": use_fake_hardware,
             "initial_joint_controller": initial_joint_controller,
