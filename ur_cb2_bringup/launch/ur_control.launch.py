@@ -90,17 +90,11 @@ def launch_setup(context, *args, **kwargs):
             "script_filename:=",
             script_filename,
             " ",
-            "prefix:=",
-            prefix,
-            " ",
             "use_fake_hardware:=",
             use_fake_hardware,
             " ",
             "fake_sensor_commands:=",
             fake_sensor_commands,
-            " ",
-            "headless_mode:=",
-            headless_mode,
             " ",
         ]
     )

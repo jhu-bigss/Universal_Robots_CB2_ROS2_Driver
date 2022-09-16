@@ -29,7 +29,7 @@ Once the code is compiled, you can launch the driver using:
 ros2 launch ur_cb2_bringup ur_control.launch.py ur_type:=<UR_TYPE> robot_ip:=<IP_OF_THE_ROBOT>
 ```
 
-- <UR_TYPE> can be 'ur3', 'ur5', 'ur10'. For e-Series robots, please use official Universal Robot driver.
+- <UR_TYPE> can be 'ur5' or 'ur10'. For e-Series robots, please use official Universal Robot driver.
 - You can see all the launch arguments by `--show-args`
 - If you are only running the driver for a CB2 UR5, then you can use this launch file instead:
     ```bash
