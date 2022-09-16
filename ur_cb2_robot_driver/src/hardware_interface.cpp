@@ -12,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// 
+// Author: Joshua Liu
 
 #include <limits>
 #include <vector>
@@ -39,7 +41,6 @@ CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::Ha
   ur_velocity_commands_ = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
 
   // other hardware parameters
-  // hw_port_ = std::stoul(info_.hardware_parameters["port"]);
   position_controller_running_ = false;
   velocity_controller_running_ = false;
   controllers_initialized_ = false;
@@ -151,28 +152,16 @@ CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting ...please wait...");
 
   std::string robot_name = info_.hardware_parameters["name"];
+  std::string ur_type = info_.hardware_parameters["ur_type"];
   // The robot's IP address.
   std::string robot_ip = info_.hardware_parameters["robot_ip"];
   // Path to the urscript code that will be sent to the robot
   std::string script_filename = info_.hardware_parameters["script_filename"];
-  // Port that will be opened to communicate between the driver and the robot controller.
-  int reverse_port = stoi(info_.hardware_parameters["reverse_port"]);
-  // The driver will offer an interface to receive the program's URScript on this port.
-  int script_sender_port = stoi(info_.hardware_parameters["script_sender_port"]);
-
-  // Enables non_blocking_read mode. Should only be used with combined_robot_hw. Disables error generated when read
-  // returns without any data, sets the read timeout to zero, and synchronises read/write operations. Enabling this when
-  // not used with combined_robot_hw can suppress important errors and affect real-time performance.
-  non_blocking_read_ = static_cast<bool>(stoi(info_.hardware_parameters["non_blocking_read"]));
-
-  // Specify gain for servoing to position in joint space.
-  // A higher gain can sharpen the trajectory.
-  int servoj_gain = stoi(info_.hardware_parameters["servoj_gain"]);
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
   // Set the UR type
-  this->SetURType(robot_name);
+  this->SetURType(ur_type);
 
   // Connect to UR robot server
   this->ConnectToUR(robot_ip);
@@ -254,7 +243,7 @@ hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp:
   time_now_ = rclcpp::Clock().now();
   rclcpp::Duration time_since_last_send_ = time_now_ - time_last_cmd_send_;
 
-  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && (!non_blocking_read_ || packet_read_) && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
+  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && packet_read_ && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
   {
     if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
     {

@@ -58,8 +58,8 @@ def SimpleServer():
 
     val = socket_read_ascii_float(7)
     mode_val = val[1]
-    textmsg("val = ", val[0])
-    textmsg("mode val = ", mode_val)
+    textmsg("num_of_var received: ", val[0])
+    textmsg("mode = ", mode_val)
 
     if val[0] >= 7:
       if mode_val == 0:

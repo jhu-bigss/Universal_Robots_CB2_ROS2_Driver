@@ -19,17 +19,15 @@ namespace
 // a list of available IPs. Use the IP that is in the same network.
 std::string GetLocalhostIP(std::string& ur_network_id)
 {
-  int ip_num;  
   std::vector<std::string> ip_adds;
+  int ip_num = osaSocket::GetLocalhostIP(ip_adds);
 
-  ip_num = osaSocket::GetLocalhostIP(ip_adds);
-
-  for (const auto& ip_add : ip_adds)
+  // Finding the local_host IP address that matches the robot's network
+  for (const auto& ip_ : ip_adds)
   {
-    if ( ip_add.substr(0, ip_add.rfind(".")) == ur_network_id )
+    if ( ip_.substr(0, ip_.rfind(".")) == ur_network_id )
     {
-      // found the local host ip matching the same network
-      return ip_add;
+      return ip_;
     }
   }
 

@@ -105,7 +105,6 @@ protected:
   geometry_msgs::msg::TransformStamped tcp_transform_;
 
   bool packet_read_;
-  bool non_blocking_read_;
 
   // robot states
   UniversalRobot::RobotModeData robot_mode_data_;
