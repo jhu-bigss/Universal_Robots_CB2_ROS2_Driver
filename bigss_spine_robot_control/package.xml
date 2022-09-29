@@ -10,12 +10,13 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>cisst</depend>
+  <depend>cisst_msgs</depend>
   <depend>cisst_ros2_bridge</depend>
   <depend>cisst_ros2_crtk</depend>
+  <depend>crtk_msgs</depend>
   <depend>sawConstraintController</depend>
   <depend>bigss_constraint_controller</depend>
   <depend>bigss_robotic_system</depend>
-  <depend>ur_cb2_gui</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -19,12 +19,17 @@ find_package(Qt5Widgets REQUIRED
 
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon
+     cisstCommonQt
      cisstVector
+     cisstVectorQt
      cisstOSAbstraction
      cisstMultiTask
+     cisstMultiTaskQt
      cisstParameterTypes
+     cisstParameterTypesQt
      cisstRobot
      cisstNumerical
+     cisstQt
      )
 
 find_package(cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES})
@@ -35,13 +40,11 @@ if (cisst_FOUND_AS_REQUIRED)
 endif (cisst_FOUND_AS_REQUIRED)
 
 find_package(cisst_msgs REQUIRED)
+find_package(crtk_msgs REQUIRED)
 find_package(cisst_ros2_bridge REQUIRED)
 find_package(cisst_ros2_crtk REQUIRED)
 
 find_package(sawConstraintController REQUIRED)
-# fix the sawConstraintController_INCLUDE_DIR and _LIBRARY_DIR by removing "/share"
-string(REPLACE "/share" "" sawConstraintController_INCLUDE_DIR ${sawConstraintController_INCLUDE_DIR})
-string(REPLACE "/share" "" sawConstraintController_LIBRARY_DIR ${sawConstraintController_LIBRARY_DIR})
 
 find_package(bigss_constraint_controller REQUIRED)
 find_package(bigss_robotic_system REQUIRED)
@@ -52,7 +55,8 @@ include_directories(${sawConstraintController_INCLUDE_DIR})
 
 link_directories(${sawConstraintController_LIBRARY_DIR})
 
-add_executable(main_ur_controller_with_snake src/node_ur_with_snake.cpp)
+add_executable(main_ur_controller_with_snake src/main_ur_with_snake_node.cpp)
+cisst_target_link_libraries(main_ur_controller_with_snake ${REQUIRED_CISST_LIBRARIES})
 ament_target_dependencies(main_ur_controller_with_snake
   rclcpp
   std_msgs
@@ -61,6 +65,7 @@ ament_target_dependencies(main_ur_controller_with_snake
   diagnostic_msgs
   cisst
   cisst_msgs
+  crtk_msgs
   cisst_ros2_bridge
   cisst_ros2_crtk
   Qt5Widgets
