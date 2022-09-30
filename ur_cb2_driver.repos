@@ -17,7 +17,7 @@ repositories:
     type: git
     url: git@github.com:jhu-cisst/cisstNetlib
     version: devel
-   cisst-saw/cisst_msgs:
+  cisst-saw/cisst_msgs:
     type: git
     url: git@github.com:jhu-cisst/ros2_cisst_msgs.git
     version: main
