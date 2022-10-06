@@ -49,7 +49,7 @@ find_package(sawConstraintController REQUIRED)
 find_package(bigss_constraint_controller REQUIRED)
 find_package(bigss_robotic_system REQUIRED)
 
-find_package(ur_cb2_gui REQUIRED)
+find_package(bigss_ur_gui REQUIRED)
 
 include_directories(${sawConstraintController_INCLUDE_DIR})
 
@@ -72,7 +72,7 @@ ament_target_dependencies(controllerURWtihSnake
   sawConstraintController
   bigss_constraint_controller
   bigss_robotic_system
-  ur_cb2_gui
+  bigss_ur_gui
 )
 
 install(TARGETS

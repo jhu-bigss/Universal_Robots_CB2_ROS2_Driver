@@ -1,7 +1,7 @@
 
-#include <ur_cb2_gui/RoboticSystemStatusWidget.h>
+#include <bigss_ur_gui/RoboticSystemStatusWidget.h>
 
-#include <ur_cb2_gui/ui_RoboticSystemStatusWidget.h>
+#include <bigss_ur_gui/ui_RoboticSystemStatusWidget.h>
 
 #include <bigss_robotic_system/mtsSARobSysTask.h>
 

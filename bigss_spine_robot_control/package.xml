@@ -17,6 +17,7 @@
   <depend>sawConstraintController</depend>
   <depend>bigss_constraint_controller</depend>
   <depend>bigss_robotic_system</depend>
+  <depend>bigss_ur_gui</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

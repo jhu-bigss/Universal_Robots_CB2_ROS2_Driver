@@ -1,11 +1,6 @@
-#include <ur_cb2_gui/RoboticSystemInputsWidget.h>
+#include <bigss_ur_gui/RoboticSystemInputsWidget.h>
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QtGui>
-#else 
 #include <QtWidgets>
-#endif
-
 #include <QString>
 
 #include <cisstCommon/cmnGenericObject.h>

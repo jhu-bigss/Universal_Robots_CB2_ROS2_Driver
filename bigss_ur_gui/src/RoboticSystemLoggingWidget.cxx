@@ -1,4 +1,4 @@
-#include <ur_cb2_gui/RoboticSystemLoggingWidget.h>
+#include <bigss_ur_gui/RoboticSystemLoggingWidget.h>
 
 #include <QGridLayout>
 #include <QPushButton>
@@ -7,7 +7,7 @@
 //#include <ctkPathLineEdit.h>
 // #include <qMRMLNodeComboBox.h>
 
-#include <ur_cb2_gui/ui_RoboticSystemLoggingWidget.h>
+#include <bigss_ur_gui/ui_RoboticSystemLoggingWidget.h>
 
 // #include <QtGui>
 

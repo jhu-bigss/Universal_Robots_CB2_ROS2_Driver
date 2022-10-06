@@ -1,9 +1,9 @@
-#include <ur_cb2_gui/RoboticSystemWidget.h>
+#include <bigss_ur_gui/RoboticSystemWidget.h>
 
-#include <ur_cb2_gui/RoboticSystemInputsWidget.h>
-#include <ur_cb2_gui/RoboticSystemControlWidget.h>
-#include <ur_cb2_gui/RoboticSystemConstraintsWidget.h>
-#include <ur_cb2_gui/RoboticSystemStatusWidget.h>
+#include <bigss_ur_gui/RoboticSystemInputsWidget.h>
+#include <bigss_ur_gui/RoboticSystemControlWidget.h>
+#include <bigss_ur_gui/RoboticSystemConstraintsWidget.h>
+#include <bigss_ur_gui/RoboticSystemStatusWidget.h>
 
 #include <QGridLayout>
 #include <QVBoxLayout>
