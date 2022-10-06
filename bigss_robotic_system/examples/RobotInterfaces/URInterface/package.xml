@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ur_interface</name>
+  <version>1.1.0</version>
+  <description>
+  URInterface
+  </description>
+  <maintainer email="henry.phalen@jhu.edu">Henry Phalen</maintainer>
+  <license>cisst</license>
+  <url>https://git.lcsr.jhu.edu/bigss/bigssroboticsystem</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>cisst</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
+</package>

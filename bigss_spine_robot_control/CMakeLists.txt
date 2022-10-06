@@ -55,9 +55,9 @@ include_directories(${sawConstraintController_INCLUDE_DIR})
 
 link_directories(${sawConstraintController_LIBRARY_DIR})
 
-add_executable(main_ur_controller_with_snake src/main_ur_with_snake_node.cpp)
-cisst_target_link_libraries(main_ur_controller_with_snake ${REQUIRED_CISST_LIBRARIES})
-ament_target_dependencies(main_ur_controller_with_snake
+add_executable(controllerURWtihSnake src/main_ur_with_snake_node.cpp)
+cisst_target_link_libraries(controllerURWtihSnake ${REQUIRED_CISST_LIBRARIES})
+ament_target_dependencies(controllerURWtihSnake
   rclcpp
   std_msgs
   std_srvs
@@ -76,7 +76,7 @@ ament_target_dependencies(main_ur_controller_with_snake
 )
 
 install(TARGETS
-  main_ur_controller_with_snake
+  controllerURWtihSnake
   DESTINATION lib/${PROJECT_NAME}
 )
 

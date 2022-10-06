@@ -15,6 +15,7 @@
 #include <bigss_robotic_system/mtsSARobSysTask.h>
 #include <bigss_robotic_system/SeriallyAttachedRoboticSystem.h>
 #include <bigss_robotic_system/RobotInterfaceObject.h>
+#include <URInterface/URInterface.h>
 
 #include <QApplication>
 #include <QMainWindow>
@@ -29,7 +30,7 @@ int main(int argc, char * argv[])
 
     // Setup ROS2
     rclcpp::init(argc, argv);
-    auto ros_node = std::make_shared<rclcpp::Node>("ur_pol_clc");
+    auto ros_node = std::make_shared<rclcpp::Node>("bigss_spine");
 
     // Call to use CISST command line arguments
     cmnCommandLineOptions options;
@@ -61,6 +62,15 @@ int main(int argc, char * argv[])
     mts_ros_crtk_bridge_provided * crtk_bridge
         = new mts_ros_crtk_bridge_provided("spine_robot_control_crtk_bridge", ros_node);
     manager->AddComponent(crtk_bridge);
+
+
+    // UR Interface
+    vctFrm3 frame_offset_to_base;
+    frame_offset_to_base.Identity(); 
+    URInterface* ur_interface = new URInterface(frame_offset_to_base, "URInterface", 6, "base"); //TODO: defaults not working, must be a constructor/initializer thing
+    manager->AddComponent(ur_interface);
+    // manager->Connect(ur_interface->GetName(),"URInterface_required",robot_server.GetName(), "server");
+
 
     // crtk_bridge->Connect();
 

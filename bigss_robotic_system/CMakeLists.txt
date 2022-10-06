@@ -57,6 +57,9 @@ if (cisst_FOUND_AS_REQUIRED)
 
   set_property(TARGET bigss_robotic_system PROPERTY FOLDER "bigss_robotic_system")
 
+  # build implementations examples
+  add_subdirectory(examples)
+
   install(
       DIRECTORY include/
       DESTINATION include
