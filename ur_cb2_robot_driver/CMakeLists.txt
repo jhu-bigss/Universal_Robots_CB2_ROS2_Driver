@@ -12,10 +12,12 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(controller_manager REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -90,6 +92,11 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(
+  PROGRAMS scripts/publisher_forward_velocity_controller.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # INSTALL
 install(
   TARGETS ur_cb2_robot_driver_plugin
@@ -114,6 +121,7 @@ ament_export_dependencies(
   hardware_interface
   pluginlib
   rclcpp
+  rclpy
   rclcpp_lifecycle
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )

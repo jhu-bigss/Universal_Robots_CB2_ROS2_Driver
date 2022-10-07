@@ -55,3 +55,33 @@ publisher_forward_position_controller:
       wrist_1_joint: [-1.6,-1.5]
       wrist_2_joint: [-0.1,0.1]
       wrist_3_joint: [-0.1,0.1]
+
+
+publisher_forward_velocity_controller:
+  ros__parameters:
+
+    controller_name: "forward_velocity_controller"
+    wait_sec_between_publish: 0.1
+
+    cmd_names: ["cmd1", "cmd2", "cmd3", "cmd4"]
+    cmd1: [0.035, 0.0, 0.0785, 0.0785, 0.08, 0.09]
+    cmd2: [-0.035, 0.0, -0.0785, -0.0785, -0.08, -0.09]
+    cmd3: [0.0, -0.015, 0.0, 0.0, -0.08, 0.0]
+    cmd4: [0.0, 0.015, 0.0, 0.0, 0.08, 0.0]
+
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
+
+    check_starting_point: false
+    starting_point_limits:
+      shoulder_pan_joint: [-0.1,0.1]
+      shoulder_lift_joint: [-1.6,-1.5]
+      elbow_joint: [-0.1,0.1]
+      wrist_1_joint: [-1.6,-1.5]
+      wrist_2_joint: [-0.1,0.1]
+      wrist_3_joint: [-0.1,0.1]
