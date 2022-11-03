@@ -2,39 +2,39 @@ repositories:
   # Universal Robots
   UR/Universal_Robots_CB2_ROS2_Driver:
     type: git
-    url: git@github.com:jhu-bigss/Universal_Robots_CB2_ROS2_Driver.git
+    url: https://github.com/jhu-bigss/Universal_Robots_CB2_ROS2_Driver.git
     version: main
   UR/Universal_Robots_ROS2_Description:
     type: git
-    url: git@github.com:jhu-bigss/Universal_Robots_ROS2_Description.git
+    url: https://github.com/jhu-bigss/Universal_Robots_ROS2_Description.git
     version: ros2
   # cisst
   cisst-saw/cisst:
     type: git
-    url: git@github.com:jhu-cisst/cisst
+    url: https://github.com/jhu-cisst/cisst
     version: devel
   cisst-saw/cisstNetlib:
     type: git
-    url: git@github.com:jhu-cisst/cisstNetlib
+    url: https://github.com/jhu-cisst/cisstNetlib
     version: devel
   cisst-saw/cisst_msgs:
     type: git
-    url: git@github.com:jhu-cisst/ros2_cisst_msgs.git
+    url: https://github.com/jhu-cisst/ros2_cisst_msgs.git
     version: main
   cisst-saw/cisst_ros2_bridge:
     type: git
-    url: git@github.com:jhu-cisst/cisst_ros2_bridge.git
+    url: https://github.com/jhu-cisst/cisst_ros2_bridge.git
     version: main
   crtk/crtk_msgs:
     type: git
-    url: git@github.com:collaborative-robotics/ros2_crtk_msgs.git
+    url: https://github.com/collaborative-robotics/ros2_crtk_msgs.git
     version: main
   cisst-saw/cisst_ros2_crtk:
     type: git
-    url: git@github.com:jhu-cisst/cisst_ros2_crtk.git
+    url: https://github.com/jhu-cisst/cisst_ros2_crtk.git
     version: main
   # cisst saw components
   cisst-saw/sawConstraintController:
     type: git
-    url: git@github.com:jhu-saw/sawConstraintController.git
+    url: https://github.com/jhu-saw/sawConstraintController.git
     version: devel
