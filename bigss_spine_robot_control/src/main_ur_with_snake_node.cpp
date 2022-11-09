@@ -17,17 +17,9 @@
 #include <bigss_robotic_system/RobotInterfaceObject.h>
 #include <URInterface/URInterface.h>
 
-#include <bigss_ur_gui/RoboticSystemWidget.h>
-#include <bigss_ur_gui/RoboticSystemInputsWidget.h>
-#include <bigss_ur_gui/RoboticSystemConstraintsWidget.h>
-#include <bigss_ur_gui/RoboticSystemStatusWidget.h>
-#include <bigss_ur_gui/RoboticSystemControlWidget.h>
-
 #include <QApplication>
 #include <QMainWindow>
 
-
-void SetupGUI(mtsComponentManager* manager, const std::string& task_name, RoboticSystemWidget& mainControlWidget);
 
 int main(int argc, char * argv[])
 {
@@ -80,7 +72,6 @@ int main(int argc, char * argv[])
     manager->AddComponent(ur_interface);
     // manager->Connect(ur_interface->GetName(),"URInterface_required",robot_server.GetName(), "server");
 
-    RoboticSystemWidget * mainControlWidget = new RoboticSystemWidget;
     // SetupGUI(manager, "system_task_test", *mainControlWidget);
 
     crtk_bridge->Connect();
@@ -88,7 +79,6 @@ int main(int argc, char * argv[])
     manager->CreateAllAndWait(2.0 * cmn_s);
     manager->StartAllAndWait(2.0 * cmn_s);
 
-    mainControlWidget->show();
     app.exec();
 
     // Stop all logs
@@ -102,15 +92,4 @@ int main(int argc, char * argv[])
     manager->Cleanup();
 
     return 0;
-}
-
-void SetupGUI(mtsComponentManager* manager, const std::string& task_name, RoboticSystemWidget& mainControlWidget){
-    manager->AddComponent(mainControlWidget.inputs_); 
-    manager->AddComponent(mainControlWidget.control_); 
-    manager->AddComponent(mainControlWidget.constraints_); 
-    manager->AddComponent(mainControlWidget.status_);
-    manager->Connect(mainControlWidget.inputs_->GetName(), "userInterface", task_name, "userInterface");
-    manager->Connect(mainControlWidget.control_->GetName(), "userInterface", task_name, "userInterface");
-    manager->Connect(mainControlWidget.constraints_->GetName(), "userInterface", task_name, "userInterface");
-    manager->Connect(mainControlWidget.status_->GetName(), "userInterface", task_name, "userInterface");
 }
