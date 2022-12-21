@@ -15,7 +15,11 @@ Make sure all the dependencies are met by running:
 rosdep install --from-paths src --ignore-src -r -y --skip-keys "reflexxes_type2"
 ```
 
-Make sure fortran is installed in order for `cisstNetlib` to be build. See cisstNetlib [Issue#5](https://github.com/jhu-cisst/cisstNetlib/issues/5#issuecomment-1169452231)
+* Make sure fortran is installed in order for `cisstNetlib` to be build. See cisstNetlib [Issue#5](https://github.com/jhu-cisst/cisstNetlib/issues/5#issuecomment-1169452231)
+* If building failed due to `CMake Error: Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR)`, then do:
+```bash
+sudo apt install swig
+```
 
 At the root of your ROS 2 workspace, build using:
 ```bash
