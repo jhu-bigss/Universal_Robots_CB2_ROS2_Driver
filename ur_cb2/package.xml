@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ur_cb2</name>
+  <version>0.0.0</version>
+  <description>Metapackage for universal robots cb2 controllers</description>
+  <maintainer email="jsliu@jhu.edu">Joshua Liu</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+ 
+ 
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
