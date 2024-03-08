@@ -26,11 +26,11 @@ UrRealtimeCommunication::UrRealtimeCommunication(
 	bzero((char *) &serv_addr_, sizeof(serv_addr_));
 	sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd_ < 0) {
-		RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "ERROR opening socket");
+		RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "ERROR opening socket");
 	}
 	server_ = gethostbyname(host.c_str());
 	if (server_ == NULL) {
-		RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "No such host");
+		RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "No such host");
 	}
 	serv_addr_.sin_family = AF_INET;
 	bcopy((char *) server_->h_addr, (char *)&serv_addr_.sin_addr.s_addr, server_->h_length);
@@ -55,7 +55,7 @@ bool UrRealtimeCommunication::start() {
 	struct timeval timeout;
 
 	keepalive_ = true;
-	RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "Realtime port: Connecting...");
+	RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Realtime port: Connecting...");
 
 	connect(sockfd_, (struct sockaddr *) &serv_addr_, sizeof(serv_addr_));
 	FD_ZERO(&writefds);
@@ -66,7 +66,7 @@ bool UrRealtimeCommunication::start() {
 	unsigned int flag_len;
 	getsockopt(sockfd_, SOL_SOCKET, SO_ERROR, &flag_, &flag_len);
 	if (flag_ < 0) {
-		RCLCPP_FATAL(rclcpp::get_logger("UrRobotHW"), "Error connecting to RT port 30003");
+		RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"), "Error connecting to RT port 30003");
 		
 		return false;
 	}
@@ -74,7 +74,7 @@ bool UrRealtimeCommunication::start() {
 	socklen_t namelen = sizeof(name);
 	int err = getsockname(sockfd_, (sockaddr*) &name, &namelen);
 	if (err < 0) {
-		RCLCPP_FATAL(rclcpp::get_logger("UrRobotHW"), "Could not get local ip");
+		RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"), "Could not get local ip");
 		close(sockfd_);
 		return false;
 	}
@@ -102,10 +102,10 @@ void UrRealtimeCommunication::addCommandToQueue(std::string inpt) {
   {
 		bytes_written = write(sockfd_, inpt.c_str(), inpt.length());
     if (bytes_written<-1)
-	  RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "bytes_written is -1");
+	  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "bytes_written is -1");
   }
   else
-		RCLCPP_ERROR_STREAM(rclcpp::get_logger("UrRobotHW"), "Could not send command \"" +inpt + "\". The robot is not connected! Command is discarded" );
+		RCLCPP_ERROR_STREAM(rclcpp::get_logger("URPositionHardwareInterface"), "Could not send command \"" +inpt + "\". The robot is not connected! Command is discarded" );
 }
 
 void UrRealtimeCommunication::setSpeed(double q0, double q1, double q2,	double q3, double q4, double q5, double acc) {
@@ -150,7 +150,7 @@ void UrRealtimeCommunication::run() {
 	fd_set readfds;
 	FD_ZERO(&readfds);
 	FD_SET(sockfd_, &readfds);
-	RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "Realtime port: Got connection");
+	RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Realtime port: Got connection");
 	connected_ = true;
 	while (keepalive_) {
 		while (connected_ && keepalive_) {
@@ -173,10 +173,10 @@ void UrRealtimeCommunication::run() {
 		}
 		if (keepalive_) {
 			//reconnect
-			RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "Realtime port: No connection. Is controller crashed? Will try to reconnect in 10 seconds...");
+			RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Realtime port: No connection. Is controller crashed? Will try to reconnect in 10 seconds...");
 			sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
 			if (sockfd_ < 0) {
-				RCLCPP_FATAL(rclcpp::get_logger("UrRobotHW"), "ERROR opening socket");
+				RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"), "ERROR opening socket");
 			}
 			flag_ = 1;
 			setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, (char *) &flag_,
@@ -199,10 +199,10 @@ void UrRealtimeCommunication::run() {
 				unsigned int flag_len;
 				getsockopt(sockfd_, SOL_SOCKET, SO_ERROR, &flag_, &flag_len);
 				if (flag_ < 0) {
-					RCLCPP_ERROR(rclcpp::get_logger("UrRobotHW"), "Error re-connecting to RT port 30003. Is controller started? Will try to reconnect in 10 seconds...");
+					RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Error re-connecting to RT port 30003. Is controller started? Will try to reconnect in 10 seconds...");
 				} else {
 					connected_ = true;
-					RCLCPP_ERROR(rclcpp::get_logger("UrRobotHW"), "Realtime reconnected");
+					RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Realtime reconnected");
 				}
 			}
 		}

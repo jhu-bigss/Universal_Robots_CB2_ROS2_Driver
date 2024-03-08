@@ -18,7 +18,7 @@
 
 #include "ur_robot_driver_cb2/ur_driver.h"
 
-namespace cb2_hw
+namespace ur_robot_driver_cb2
 {
   
 UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
@@ -42,7 +42,7 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 
 	incoming_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (incoming_sockfd_ < 0) {
-		RCLCPP_FATAL(rclcpp::get_logger("UrRobotHW"), "ERROR opening socket for reverse communication");
+		RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"), "ERROR opening socket for reverse communication");
 	}
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 
@@ -55,7 +55,7 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 	setsockopt(incoming_sockfd_, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int));
 	if (bind(incoming_sockfd_, (struct sockaddr *) &serv_addr,
 			sizeof(serv_addr)) < 0) {
-		RCLCPP_WARN_STREAM(rclcpp::get_logger("UrRobotHW"),"Listening on " + ip_addr_ + ":" + std::to_string(m_reverse_port)+ "\n");
+		RCLCPP_WARN_STREAM(rclcpp::get_logger("URPositionHardwareInterface"),"Listening on " + ip_addr_ + ":" + std::to_string(m_reverse_port)+ "\n");
 		
 	}
 	listen(incoming_sockfd_, 5);
@@ -67,16 +67,16 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 bool UrDriver::start() {
 	if (!sec_interface_->start())
   {
-	RCLCPP_ERROR(rclcpp::get_logger("UrRobotHW"), "Unable to open secondary connection");
+	RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Unable to open secondary connection");
 	return false;
   }
 	firmware_version_ = sec_interface_->robot_state_->getVersion();
-  	RCLCPP_INFO(rclcpp::get_logger("UrRobotHW"), "FIRMWARE VERSION %f",firmware_version_);
+  	RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "FIRMWARE VERSION %f",firmware_version_);
 	rt_interface_->robot_state_->setVersion(firmware_version_);
 	if (!rt_interface_->start())
 		return false;
 	ip_addr_ = rt_interface_->getLocalIp();
-	RCLCPP_DEBUG_STREAM(rclcpp::get_logger("UrRobotHW"), "Listening on " + ip_addr_ + ":" + std::to_string(m_reverse_port) + "\n");
+	RCLCPP_DEBUG_STREAM(rclcpp::get_logger("URPositionHardwareInterface"), "Listening on " + ip_addr_ + ":" + std::to_string(m_reverse_port) + "\n");
 	return true;
 
 }
@@ -161,7 +161,7 @@ bool UrDriver::setPayload(double m) {
 		char buf[256];
 		sprintf(buf, "sec setOut():\n\tset_payload(%1.3f)\nend\n", m);
 		rt_interface_->addCommandToQueue(buf);
-		RCLCPP_DEBUG_STREAM(rclcpp::get_logger("UrRobotHW"),buf);
+		RCLCPP_DEBUG_STREAM(rclcpp::get_logger("URPositionHardwareInterface"),buf);
 		return true;
 	} else
 		return false;

@@ -1,4 +1,4 @@
-<library path="ur_robot_driver_cb2">
+<library path="ur_robot_driver_cb2_plugin">
   <class name="ur_robot_driver_cb2/URPositionHardwareInterface"
          type="ur_robot_driver_cb2::URPositionHardwareInterface"
          base_class_type="hardware_interface::SystemInterface">

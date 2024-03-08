@@ -340,7 +340,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	}
 
 	if (!len_good) {
-		// RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "Wrong length of message on RT interface: %i\n", len);
+		// RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Wrong length of message on RT interface: %i\n", len);
 
 		val_lock_.unlock();
 		return;

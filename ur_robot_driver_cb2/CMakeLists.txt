@@ -20,9 +20,21 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  hardware_interface
+  pluginlib
+  rclcpp
+  rclcpp_lifecycle
+  controller_manager
+  controller_manager_msgs
+  geometry_msgs
+  std_msgs
+  std_srvs
+  tf2_geometry_msgs
+)
 
 add_library(
-  ur_robot_driver_cb2
+  ur_robot_driver_cb2_plugin
   SHARED
   src/ur_hardware_interface.cpp
   src/ur_driver.cpp
@@ -32,36 +44,34 @@ add_library(
   src/ur_realtime_communication.cpp
 )
 target_include_directories(
-  ur_robot_driver_cb2
+  ur_robot_driver_cb2_plugin
   PUBLIC
   include
 )
 ament_target_dependencies(
-  ur_robot_driver_cb2
-  hardware_interface
-  rclcpp
-  rclcpp_lifecycle
-  controller_manager
-  controller_manager_msgs
-  geometry_msgs
-  hardware_interface
-  pluginlib
-  rclcpp
-  rclcpp_lifecycle
-  std_msgs
-  std_srvs
-  tf2_geometry_msgs
+  ur_robot_driver_cb2_plugin
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 # prevent pluginlib from using boost
-target_compile_definitions(ur_robot_driver_cb2 PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+target_compile_definitions(ur_robot_driver_cb2_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 pluginlib_export_plugin_description_file(
   hardware_interface hardware_interface_plugin.xml)
 
 install(
   TARGETS
-  ur_robot_driver_cb2
+  ur_robot_driver_cb2_plugin
   DESTINATION lib
+)
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  DIRECTORY launch config
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
@@ -85,30 +95,16 @@ if(BUILD_TESTING)
     pluginlib
     ros2_control_test_assets
   )
-
 endif()
 
 ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  ur_robot_driver_cb2
+  ur_robot_driver_cb2_plugin
 )
 ament_export_dependencies(
-  hardware_interface
-  pluginlib
-  rclcpp
-  rclcpp_lifecycle
-  controller_manager
-  controller_manager_msgs
-  geometry_msgs
-  hardware_interface
-  pluginlib
-  rclcpp
-  rclcpp_lifecycle
-  std_msgs
-  std_srvs
-  tf2_geometry_msgs
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 ament_package()

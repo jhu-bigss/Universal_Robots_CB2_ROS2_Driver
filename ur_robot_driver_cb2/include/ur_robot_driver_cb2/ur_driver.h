@@ -34,7 +34,7 @@
 
 #include <chrono>
 
-namespace cb2_hw
+namespace ur_robot_driver_cb2
 {
   
 class UrDriver {

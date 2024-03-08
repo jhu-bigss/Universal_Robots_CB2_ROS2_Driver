@@ -34,7 +34,7 @@
 using vector6d_t = std::vector<double>;
 
 
-namespace cb2_hw
+namespace ur_robot_driver_cb2
 {
   
   enum class PausingState
@@ -51,12 +51,12 @@ namespace cb2_hw
     STOP_VELOCITY
   };
 
-  class UrRobotHW: public hardware_interface::SystemInterface
+  class URPositionHardwareInterface: public hardware_interface::SystemInterface
   {
   public:
-    RCLCPP_SHARED_PTR_DEFINITIONS(UrRobotHW);
-    UrRobotHW();
-    virtual ~UrRobotHW()
+    RCLCPP_SHARED_PTR_DEFINITIONS(URPositionHardwareInterface);
+    URPositionHardwareInterface();
+    virtual ~URPositionHardwareInterface()
     {
     };
 
@@ -112,7 +112,7 @@ namespace cb2_hw
 
     
     // UrDriver Variables
-    std::unique_ptr<cb2_hw::UrDriver> m_driver;
+    std::unique_ptr<ur_robot_driver_cb2::UrDriver> m_driver;
     std::condition_variable m_rt_msg_cond;
     std::condition_variable m_msg_cond;
     int m_max_velocity;
