@@ -1,5 +1,5 @@
-#ifndef __ITIA_UR_HARDWARE_INTERFACE__
-#define __ITIA_UR_HARDWARE_INTERFACE__
+#ifndef __BIGSS_UR_HARDWARE_INTERFACE__
+#define __BIGSS_UR_HARDWARE_INTERFACE__
 
 
 #include <memory>
@@ -14,10 +14,6 @@
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/visibility_control.h"
 
-// // UR stuff
-// #include "ur_client_library/ur_driver.h"
-// #include "ur_robot_driver/dashboard_client_ros.hpp"
-// #include "ur_dashboard_msgs/msg/robot_mode.hpp"
 
 // ROS
 #include "rclcpp/macros.hpp"

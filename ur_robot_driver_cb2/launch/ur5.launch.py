@@ -70,12 +70,20 @@ def generate_launch_description():
             ],
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "cb2_controller",
+            default_value="true",
+            description="Is using CB2 robot controller?",
+        )
+    )
 
     # Initialize Arguments
     robot_ip = LaunchConfiguration("robot_ip")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
     fake_sensor_commands = LaunchConfiguration("fake_sensor_commands")
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
+    cb2_controller = LaunchConfiguration("cb2_controller")
 
     base_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("ur_robot_driver_cb2"), "/launch/ur_control.launch.py"]),
@@ -85,6 +93,7 @@ def generate_launch_description():
             "use_fake_hardware": use_fake_hardware,
             "fake_sensor_commands": fake_sensor_commands,
             "initial_joint_controller": initial_joint_controller,
+            "cb2_controller": cb2_controller,
         }.items(),
     )
 

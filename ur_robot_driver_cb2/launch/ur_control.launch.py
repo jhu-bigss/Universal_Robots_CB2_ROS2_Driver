@@ -67,6 +67,7 @@ def launch_setup(context, *args, **kwargs):
     tool_device_name = LaunchConfiguration("tool_device_name")
     tool_tcp_port = LaunchConfiguration("tool_tcp_port")
     tool_voltage = LaunchConfiguration("tool_voltage")
+    cb2_controller = LaunchConfiguration("cb2_controller")
 
     joint_limit_params = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
@@ -165,19 +166,19 @@ def launch_setup(context, *args, **kwargs):
             PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
             " ",
             "name:=",
-            "ur5",
+            ur_type,
             " ",
             "ur_type:=",
-            "ur5",
+            ur_type,
             " ",
             "prefix:=",
-            "",
+            prefix,
             " ",
             "robot_ip:=",
             robot_ip,
             " ",
             "cb2_controller:=",
-            "true",
+            cb2_controller,
         ]
     )
 
@@ -471,6 +472,13 @@ def generate_launch_description():
             "tool_voltage",
             default_value="24",
             description="Tool voltage that will be setup.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "cb2_controller",
+            default_value="true",
+            description="Use CB2 controller.",
         )
     )
 
