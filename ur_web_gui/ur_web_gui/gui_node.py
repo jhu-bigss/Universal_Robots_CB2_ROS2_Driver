@@ -75,7 +75,7 @@ class WebGuiNode(Node):
 
             joint_list.append(name)
 
-            joint = {'min': minval, 'max': maxval, 'position': 0.0}
+            joint = {'min': _convert_to_deg(minval), 'max': _convert_to_deg(maxval), 'current_position_in_deg': 0.0, 'desired_position_in_deg': 0.0}
 
             if jtype == 'continuous':
                 joint['continuous'] = True
@@ -123,6 +123,8 @@ class WebGuiNode(Node):
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
         app.add_static_files('/static', package_share_directory + '/meshes/' + self.get_parameter('robot_type').value + '/visual')
 
+        self.visualization_enabled = self.get_parameter('visualization_enable').value
+
         self.free_joints = {}
         self.joint_list = []
         self.links = {}
@@ -152,17 +154,24 @@ class WebGuiNode(Node):
             with ui.row().classes('items-stretch'):
                 with ui.card().classes('w-300 text-center items-center'):
                     ui.label('Joint Control').classes('text-2xl')
+                    self.control_on_switch = ui.switch('Remote Control')
+                    self.realtime_jog_switch = ui.switch('Real-time')
+                    ui.label('Real-time jogging is ON! Please be careful!').classes('text-xs text-red-500').bind_visibility_from(self.realtime_jog_switch, 'value')
                     for j in self.joint_list:
                         joint = self.free_joints[j]
-                        joint["ui_label"] = ui.label(j + ": ").classes('text-xs mb-[-1.4em]')
-                        joint["ui_slider"] = ui.slider(min=_convert_to_deg(joint['min']), max=_convert_to_deg(joint['max']), step=0.1, value=_convert_to_deg(joint['position'])) \
-                            .on('update:model-value', lambda e: self.publish_fwd_pos_controller(e))
+                        ui.label(j).classes('text-l text-bold')
+                        joint["ui_label"] = ui.label().classes('mb-[-1.4em]').bind_text_from(joint, 'current_position_in_deg', lambda x: "%.2f" % x + "°")
+                        joint["ui_slider"] = ui.slider(min=joint['min'], max=joint['max'], step=0.1, on_change=self.pub_cmd_fwd_pos_controller_realtime) \
+                            .props('label').on('update:model-value', throttle=1.0, leading_events=False) \
+                            .bind_value(joint, 'desired_position_in_deg').bind_enabled_from(self.control_on_switch, 'value')
+
+                    ui.button('Reset', on_click=self.reset_desired_joint_positions).bind_enabled_from(self.control_on_switch, 'value')
+                    ui.button('Send Commands', on_click=self.publish_fwd_pos_controller).bind_enabled_from(self.control_on_switch, 'value')
 
                 # Cartesian Control
                 # TODO: Implement Cartesian Control
 
                 # Visualization
-                self.visualization_enabled = self.get_parameter('visualization_enable').value
                 if self.visualization_enabled:
                     with ui.card().classes('w-300 h-300 items-center'):
                         ui.label('Visualization').classes('text-2xl')
@@ -179,19 +188,26 @@ class WebGuiNode(Node):
         for i, name in enumerate(msg.name):
             if name in self.joint_list:
                 pos = msg.position[i]
-                self.free_joints[name]['position'] = pos
-                self.free_joints[name]["ui_label"].set_text(name + ": " + "%.2f" % _convert_to_deg(pos) + "°")
-                # initialize the slider value to match the current joint position
-                if self.free_joints[name]["ui_slider"].value == 0.0:
-                    self.free_joints[name]["ui_slider"].value = _convert_to_deg(self.free_joints[name]['position'])
+                self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(pos)
+                # initialize the desired_position value to match the current joint position
+                if self.free_joints[name]["desired_position_in_deg"] == 0.0:
+                    self.free_joints[name]["desired_position_in_deg"] = _convert_to_deg(pos)
 
         if self.visualization_enabled:
             self.update_visualization()
 
-    def publish_fwd_pos_controller(self, e):
+    def reset_desired_joint_positions(self, e):
+        for joint in self.joint_list:
+            self.free_joints[joint]['desired_position_in_deg'] = self.free_joints[joint]['current_position_in_deg']
+
+    def pub_cmd_fwd_pos_controller_realtime(self):
+        if self.realtime_jog_switch.value:
+            self.publish_fwd_pos_controller()
+
+    def publish_fwd_pos_controller(self):
         msg = Float64MultiArray()
         for joint in self.joint_list:
-            msg.data.append(_convert_to_rad(self.free_joints[joint]['ui_slider'].value))
+            msg.data.append(_convert_to_rad(self.free_joints[joint]['desired_position_in_deg']))
 
         self.pub_cmd_fwd_pos_controller.publish(msg)
 
