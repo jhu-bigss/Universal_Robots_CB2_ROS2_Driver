@@ -5,6 +5,8 @@ import xml.dom.minidom
 import math
 import threading
 from pathlib import Path
+import PyKDL as kdl
+import kdl_parser_py.urdf as kdl_parser
 
 import rclpy
 from std_msgs.msg import Float64MultiArray, String
@@ -36,6 +38,14 @@ class WebGuiNode(Node):
     def init_urdf(self, xmldom):
         free_joints = {}
         joint_list = []
+        links = {}
+        visual_link_list = ['base_link_inertia',
+                     'shoulder_link',
+                     'upperarm_link',
+                     'forearm_link',
+                     'wrist_1_link',
+                     'wrist_2_link',
+                     'wrist_3_link'] # temporary hard-coded list
 
         robot_list = xmldom.getElementsByTagName('robot')
         if not robot_list:
@@ -45,51 +55,69 @@ class WebGuiNode(Node):
         for child in robot.childNodes:
             if child.nodeType is child.TEXT_NODE:
                 continue
-            if child.localName != 'joint':
-                continue
-            jtype = child.getAttribute('type')
-            if jtype in ('fixed', 'floating', 'planar'):
-                continue
-            name = child.getAttribute('name')
-            if jtype == 'continuous':
-                minval = -math.pi * 2
-                maxval = math.pi * 2
-            else:
-                # Limits are required, and required to be floats.
-                limit_list = child.getElementsByTagName('limit')
-                if not limit_list:
-                    raise Exception(
-                        f'Limits must be specified for joint "{name}" of type "{jtype}"')
+            if child.localName == 'link':
+                if child.getAttribute('name') not in visual_link_list:
+                    continue
+                links[child.getAttribute('name')] = {'xyz': child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz'),
+                                                     'rpy': child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy')}
+            if child.localName == 'joint':
+                jtype = child.getAttribute('type')
+                if jtype in ('fixed', 'floating', 'planar'):
+                    continue
+                name = child.getAttribute('name')
+                parent_link = child.getElementsByTagName('parent').item(0).getAttribute('link')
+                child_link = child.getElementsByTagName('child').item(0).getAttribute('link')
+                if jtype == 'continuous':
+                    minval = -math.pi * 2
+                    maxval = math.pi * 2
+                else:
+                    # Limits are required, and required to be floats.
+                    limit_list = child.getElementsByTagName('limit')
+                    if not limit_list:
+                        raise Exception(
+                            f'Limits must be specified for joint "{name}" of type "{jtype}"')
 
-                limit = limit_list[0]
+                    limit = limit_list[0]
 
-                if not limit.hasAttribute('lower'):
-                    raise Exception(
-                        f'"lower" limit must be specified for joint "{name}" of type "{jtype}"')
-                minval = _convert_to_float(name, jtype, 'lower', limit.getAttribute('lower'))
+                    if not limit.hasAttribute('lower'):
+                        raise Exception(
+                            f'"lower" limit must be specified for joint "{name}" of type "{jtype}"')
+                    minval = _convert_to_float(name, jtype, 'lower', limit.getAttribute('lower'))
 
-                if not limit.hasAttribute('upper'):
-                    raise Exception(
-                        f'"upper" limit must be specified for joint "{name}" of type "{jtype}"')
-                maxval = _convert_to_float(name, jtype, 'upper', limit.getAttribute('upper'))
+                    if not limit.hasAttribute('upper'):
+                        raise Exception(
+                            f'"upper" limit must be specified for joint "{name}" of type "{jtype}"')
+                    maxval = _convert_to_float(name, jtype, 'upper', limit.getAttribute('upper'))
 
-            joint_list.append(name)
+                joint_list.append(name)
 
-            joint = {'min': _convert_to_deg(minval), 'max': _convert_to_deg(maxval), 'current_position_in_deg': 0.0, 'desired_position_in_deg': 0.0}
+                joint = {'min': _convert_to_deg(minval),
+                         'max': _convert_to_deg(maxval),
+                         'current_position_in_deg': 0.0,
+                         'desired_position_in_deg': 0.0,
+                         'parent_link': parent_link,
+                         'child_link': child_link,
+                         }
 
-            if jtype == 'continuous':
-                joint['continuous'] = True
-            free_joints[name] = joint
+                if jtype == 'continuous':
+                    joint['continuous'] = True
+                free_joints[name] = joint
 
-        return (free_joints, joint_list)
+        return (free_joints, joint_list, links, visual_link_list)
 
     def configure_robot(self, description):
         self.get_logger().debug('Got description, configuring robot')
         xmldom = xml.dom.minidom.parseString(description)
-        (free_joints, joint_list) = self.init_urdf(xmldom)
+        (self.free_joints, self.joint_list, self.links, self.link_list) = self.init_urdf(xmldom)
 
-        self.free_joints = free_joints
-        self.joint_list = joint_list  # for maintaining the original order of the joints
+        # configure the robot kinematics using PyKDL
+        flag, kdl_tree = kdl_parser.treeFromString(description)
+        self.kdl_chain = kdl_tree.getChain(self.free_joints[self.joint_list[0]]['parent_link'], self.free_joints[self.joint_list[-1]]['child_link'])
+        self.kdl_joints = kdl.JntArray(self.kdl_chain.getNrOfJoints())
+        self.kdl_fk_solver = kdl.ChainFkSolverPos_recursive(self.kdl_chain)
+
+        # configure the UI
+        self.configure_ui()
 
     def declare_ros_parameter(self, name, default, descriptor):
         # When the automatically_declare_parameters_from_overrides parameter to
@@ -111,23 +139,22 @@ class WebGuiNode(Node):
         except Exception as e:
             self.get_logger().warn(str(e))
 
-        # configure the UI after the robot description is received
-        self.configure_ui()
-
     def __init__(self, description_file ):
         super().__init__('ur_web_gui', automatically_declare_parameters_from_overrides=True)
 
-        self.declare_ros_parameter('visualization_enable', False, ParameterDescriptor(type=ParameterType.PARAMETER_BOOL, description='enable visualization'))
-        self.declare_ros_parameter('robot_type', 'ur5', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
+        self.declare_ros_parameter('ur_type', 'ur5', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
         self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
-        app.add_static_files('/static', package_share_directory + '/meshes/' + self.get_parameter('robot_type').value + '/visual')
-
-        self.visualization_enabled = self.get_parameter('visualization_enable').value
+        app.add_static_files('/static', package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual')
 
         self.free_joints = {}
         self.joint_list = []
         self.links = {}
+        self.link_list = []
+        self.ui_links = []
+        self.kdl_chain = None
+        self.kdl_joints = kdl.JntArray(6) # 6 joints by default
+        self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
 
         if description_file is not None:
             # If we were given a URDF file on the command-line, use that.
@@ -161,10 +188,11 @@ class WebGuiNode(Node):
                         joint = self.free_joints[j]
                         ui.label(j).classes('text-l text-bold')
                         joint["ui_label"] = ui.label().classes('mb-[-1.4em]').bind_text_from(joint, 'current_position_in_deg', lambda x: "%.2f" % x + "°")
-                        joint["ui_slider"] = ui.slider(min=joint['min'], max=joint['max'], step=0.1, on_change=self.pub_cmd_fwd_pos_controller_realtime) \
+                        joint["ui_slider"] = ui.slider(min=joint['min'], max=joint['max'], step=0.1, on_change=self.set_desired_joint_positions) \
                             .props('label').on('update:model-value', throttle=1.0, leading_events=False) \
                             .bind_value(joint, 'desired_position_in_deg').bind_enabled_from(self.control_on_switch, 'value')
 
+                    # Buttons
                     ui.button('Reset', on_click=self.reset_desired_joint_positions).bind_enabled_from(self.control_on_switch, 'value')
                     ui.button('Send Commands', on_click=self.publish_fwd_pos_controller).bind_enabled_from(self.control_on_switch, 'value')
 
@@ -172,35 +200,34 @@ class WebGuiNode(Node):
                 # TODO: Implement Cartesian Control
 
                 # Visualization
-                if self.visualization_enabled:
-                    with ui.card().classes('w-300 h-300 items-center'):
-                        ui.label('Visualization').classes('text-2xl')
-                        with ui.scene(500, 500) as scene:
-                            self.links["base_link"] = scene.stl('/static/base.stl')
-                            self.links["shoulder_link"] = scene.stl('/static/shoulder.stl')
-                            self.links["upperarm_link"] = scene.stl('/static/upperarm.stl')
-                            self.links["forearm_link"] = scene.stl('/static/forearm.stl')
-                            self.links["wrist_1_link"] = scene.stl('/static/wrist1.stl')
-                            self.links["wrist_2_link"] = scene.stl('/static/wrist2.stl')
-                            self.links["wrist_3_link"] = scene.stl('/static/wrist3.stl')
+                with ui.card().classes('w-300 h-300 items-center'):
+                    ui.label('Visualization').classes('text-2xl')
+                    with ui.scene(500, 500) as scene:
+                        self.ui_links.append(scene.stl('/static/base.stl'))
+                        self.ui_links.append(scene.stl('/static/shoulder.stl'))
+                        self.ui_links.append(scene.stl('/static/upperarm.stl'))
+                        self.ui_links.append(scene.stl('/static/forearm.stl'))
+                        self.ui_links.append(scene.stl('/static/wrist1.stl'))
+                        self.ui_links.append(scene.stl('/static/wrist2.stl'))
+                        self.ui_links.append(scene.stl('/static/wrist3.stl'))
 
     def joint_states_callback(self, msg):
-        for i, name in enumerate(msg.name):
-            if name in self.joint_list:
-                pos = msg.position[i]
-                self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(pos)
-                # initialize the desired_position value to match the current joint position
-                if self.free_joints[name]["desired_position_in_deg"] == 0.0:
-                    self.free_joints[name]["desired_position_in_deg"] = _convert_to_deg(pos)
+        if len(self.joint_list) == len(msg.name):
+            for i, name in enumerate(msg.name):
+                # self.kdl_joints[i] = msg.position[i]
+                self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(msg.position[i])
 
-        if self.visualization_enabled:
+        if self.kdl_chain is not None:
             self.update_visualization()
 
-    def reset_desired_joint_positions(self, e):
+    def reset_desired_joint_positions(self):
         for joint in self.joint_list:
             self.free_joints[joint]['desired_position_in_deg'] = self.free_joints[joint]['current_position_in_deg']
 
-    def pub_cmd_fwd_pos_controller_realtime(self):
+    def set_desired_joint_positions(self):
+        for i, joint in enumerate(self.joint_list):
+            self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
+
         if self.realtime_jog_switch.value:
             self.publish_fwd_pos_controller()
 
@@ -212,8 +239,10 @@ class WebGuiNode(Node):
         self.pub_cmd_fwd_pos_controller.publish(msg)
 
     def update_visualization(self):
-        pass
-
+        for i, link in enumerate(self.ui_links):
+            self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], i)
+            link.rotate(*self.T[i].M.GetRPY())
+            link.move(*self.T[i].p)
 
 def main() -> None:
     # NOTE: This function is defined as the ROS entry point in setup.py, but it's empty to enable NiceGUI auto-reloading
