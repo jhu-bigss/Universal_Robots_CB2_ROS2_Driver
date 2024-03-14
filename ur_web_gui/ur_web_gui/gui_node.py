@@ -39,13 +39,7 @@ class WebGuiNode(Node):
         free_joints = {}
         joint_list = []
         links = {}
-        visual_link_list = ['base_link_inertia',
-                     'shoulder_link',
-                     'upper_arm_link',
-                     'forearm_link',
-                     'wrist_1_link',
-                     'wrist_2_link',
-                     'wrist_3_link'] # temporary hard-coded list
+        visual_link_list = []
 
         robot_list = xmldom.getElementsByTagName('robot')
         if not robot_list:
@@ -56,10 +50,12 @@ class WebGuiNode(Node):
             if child.nodeType is child.TEXT_NODE:
                 continue
             if child.localName == 'link':
-                if child.getAttribute('name') not in visual_link_list:
+                if child.getElementsByTagName('visual').length == 0:
                     continue
-                links[child.getAttribute('name')] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
-                                                     'rpy': [float(n) for n in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy').split(" ")]}
+                name = child.getAttribute('name')
+                visual_link_list.append(name)
+                links[name] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
+                               'rpy': [float(n) for n in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy').split(" ")]}
             if child.localName == 'joint':
                 jtype = child.getAttribute('type')
                 if jtype in ('fixed', 'floating', 'planar'):
@@ -145,7 +141,8 @@ class WebGuiNode(Node):
         self.declare_ros_parameter('ur_type', 'ur10e', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
         self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
-        app.add_static_files('/static', package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual')
+        # app.add_static_files('/static', local_directory=package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual')
+        self.meshes_directory = package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual'
 
         self.free_joints = {}
         self.joint_list = []
@@ -154,6 +151,7 @@ class WebGuiNode(Node):
         self.kdl_chain = None
         self.kdl_joints = kdl.JntArray(6) # 6 joints by default
         self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
+        self.ui_configured = False
 
         if description_file is not None:
             # If we were given a URDF file on the command-line, use that.
@@ -202,20 +200,23 @@ class WebGuiNode(Node):
                 with ui.card().classes('w-300 h-300 items-center'):
                     ui.label('Visualization').classes('text-2xl')
                     with ui.scene(500, 500) as scene:
-                        self.links['base_link_inertia']['stl'] = scene.stl('/static/base.stl')
-                        self.links['shoulder_link']['stl'] = scene.stl('/static/shoulder.stl')
-                        self.links['upper_arm_link']['stl'] = scene.stl('/static/upperarm.stl')
-                        self.links['forearm_link']['stl'] = scene.stl('/static/forearm.stl')
-                        self.links['wrist_1_link']['stl'] = scene.stl('/static/wrist1.stl')
-                        self.links['wrist_2_link']['stl'] = scene.stl('/static/wrist2.stl')
-                        self.links['wrist_3_link']['stl'] = scene.stl('/static/wrist3.stl')
+                        # Note: the official ur_description package uses dae files, you need to convert them to glb files in order to show textures
+                        self.links['base_link_inertia']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/base.glb'))
+                        self.links['shoulder_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/shoulder.glb'))
+                        self.links['upper_arm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/upperarm.glb'))
+                        self.links['forearm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/forearm.glb'))
+                        self.links['wrist_1_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist1.glb'))
+                        self.links['wrist_2_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist2.glb'))
+                        self.links['wrist_3_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist3.glb'))
+
+        self.ui_configured = True
 
     def joint_states_callback(self, msg):
         if len(self.joint_list) == len(msg.name):
             for i, name in enumerate(msg.name):
                 self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(msg.position[i])
 
-        if self.kdl_chain is not None:
+        if self.ui_configured:
             self.update_visualization()
 
     def control_on_switch_cb(self, e):
@@ -245,9 +246,10 @@ class WebGuiNode(Node):
         for i, link in enumerate(self.link_list):
             self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], i)
             T = kdl.Frame(kdl.Rotation.RPY(*self.links[link]['rpy']), kdl.Vector(*self.links[link]['xyz']))
+            T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
             T = self.T[i] * T # where magic happens
-            self.links[link]['stl'].rotate(*T.M.GetRPY())
-            self.links[link]['stl'].move(*T.p)
+            self.links[link]['mesh'].rotate(*T.M.GetRPY())
+            self.links[link]['mesh'].move(*T.p)
 
 def main() -> None:
     # NOTE: This function is defined as the ROS entry point in setup.py, but it's empty to enable NiceGUI auto-reloading
