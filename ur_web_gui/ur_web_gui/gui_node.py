@@ -17,7 +17,7 @@ from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 
 from ament_index_python.packages import get_package_share_directory
 
-from nicegui import app, globals, run, ui
+from nicegui import Client, app, ui, ui_run
 
 
 def _convert_to_float(name, jtype, limit_name, input_string):
@@ -41,7 +41,7 @@ class WebGuiNode(Node):
         links = {}
         visual_link_list = ['base_link_inertia',
                      'shoulder_link',
-                     'upperarm_link',
+                     'upper_arm_link',
                      'forearm_link',
                      'wrist_1_link',
                      'wrist_2_link',
@@ -58,8 +58,8 @@ class WebGuiNode(Node):
             if child.localName == 'link':
                 if child.getAttribute('name') not in visual_link_list:
                     continue
-                links[child.getAttribute('name')] = {'xyz': child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz'),
-                                                     'rpy': child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy')}
+                links[child.getAttribute('name')] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
+                                                     'rpy': [float(n) for n in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy').split(" ")]}
             if child.localName == 'joint':
                 jtype = child.getAttribute('type')
                 if jtype in ('fixed', 'floating', 'planar'):
@@ -112,7 +112,7 @@ class WebGuiNode(Node):
 
         # configure the robot kinematics using PyKDL
         flag, kdl_tree = kdl_parser.treeFromString(description)
-        self.kdl_chain = kdl_tree.getChain(self.free_joints[self.joint_list[0]]['parent_link'], self.free_joints[self.joint_list[-1]]['child_link'])
+        self.kdl_chain = kdl_tree.getChain(self.link_list[0], self.link_list[-1])
         self.kdl_joints = kdl.JntArray(self.kdl_chain.getNrOfJoints())
         self.kdl_fk_solver = kdl.ChainFkSolverPos_recursive(self.kdl_chain)
 
@@ -142,7 +142,7 @@ class WebGuiNode(Node):
     def __init__(self, description_file ):
         super().__init__('ur_web_gui', automatically_declare_parameters_from_overrides=True)
 
-        self.declare_ros_parameter('ur_type', 'ur5', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
+        self.declare_ros_parameter('ur_type', 'ur10e', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
         self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
         app.add_static_files('/static', package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual')
@@ -151,7 +151,6 @@ class WebGuiNode(Node):
         self.joint_list = []
         self.links = {}
         self.link_list = []
-        self.ui_links = []
         self.kdl_chain = None
         self.kdl_joints = kdl.JntArray(6) # 6 joints by default
         self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
@@ -176,12 +175,12 @@ class WebGuiNode(Node):
 
     def configure_ui(self):
         # Web GUI
-        with globals.index_client:
+        with Client.auto_index_client:
             # Joint Control
             with ui.row().classes('items-stretch'):
                 with ui.card().classes('w-300 text-center items-center'):
                     ui.label('Joint Control').classes('text-2xl')
-                    self.control_on_switch = ui.switch('Remote Control')
+                    self.control_on_switch = ui.switch('Remote Control', on_change=lambda e: self.control_on_switch_cb(e))
                     self.realtime_jog_switch = ui.switch('Real-time')
                     ui.label('Real-time jogging is ON! Please be careful!').classes('text-xs text-red-500').bind_visibility_from(self.realtime_jog_switch, 'value')
                     for j in self.joint_list:
@@ -203,22 +202,25 @@ class WebGuiNode(Node):
                 with ui.card().classes('w-300 h-300 items-center'):
                     ui.label('Visualization').classes('text-2xl')
                     with ui.scene(500, 500) as scene:
-                        self.ui_links.append(scene.stl('/static/base.stl'))
-                        self.ui_links.append(scene.stl('/static/shoulder.stl'))
-                        self.ui_links.append(scene.stl('/static/upperarm.stl'))
-                        self.ui_links.append(scene.stl('/static/forearm.stl'))
-                        self.ui_links.append(scene.stl('/static/wrist1.stl'))
-                        self.ui_links.append(scene.stl('/static/wrist2.stl'))
-                        self.ui_links.append(scene.stl('/static/wrist3.stl'))
+                        self.links['base_link_inertia']['stl'] = scene.stl('/static/base.stl')
+                        self.links['shoulder_link']['stl'] = scene.stl('/static/shoulder.stl')
+                        self.links['upper_arm_link']['stl'] = scene.stl('/static/upperarm.stl')
+                        self.links['forearm_link']['stl'] = scene.stl('/static/forearm.stl')
+                        self.links['wrist_1_link']['stl'] = scene.stl('/static/wrist1.stl')
+                        self.links['wrist_2_link']['stl'] = scene.stl('/static/wrist2.stl')
+                        self.links['wrist_3_link']['stl'] = scene.stl('/static/wrist3.stl')
 
     def joint_states_callback(self, msg):
         if len(self.joint_list) == len(msg.name):
             for i, name in enumerate(msg.name):
-                # self.kdl_joints[i] = msg.position[i]
                 self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(msg.position[i])
 
         if self.kdl_chain is not None:
             self.update_visualization()
+
+    def control_on_switch_cb(self, e):
+        if e.value:
+            self.reset_desired_joint_positions()
 
     def reset_desired_joint_positions(self):
         for joint in self.joint_list:
@@ -228,6 +230,7 @@ class WebGuiNode(Node):
         for i, joint in enumerate(self.joint_list):
             self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
 
+        # if real-time jogging is ON, publish the joint positions right away
         if self.realtime_jog_switch.value:
             self.publish_fwd_pos_controller()
 
@@ -239,10 +242,12 @@ class WebGuiNode(Node):
         self.pub_cmd_fwd_pos_controller.publish(msg)
 
     def update_visualization(self):
-        for i, link in enumerate(self.ui_links):
+        for i, link in enumerate(self.link_list):
             self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], i)
-            link.rotate(*self.T[i].M.GetRPY())
-            link.move(*self.T[i].p)
+            T = kdl.Frame(kdl.Rotation.RPY(*self.links[link]['rpy']), kdl.Vector(*self.links[link]['xyz']))
+            T = self.T[i] * T # where magic happens
+            self.links[link]['stl'].rotate(*T.M.GetRPY())
+            self.links[link]['stl'].move(*T.p)
 
 def main() -> None:
     # NOTE: This function is defined as the ROS entry point in setup.py, but it's empty to enable NiceGUI auto-reloading
@@ -271,5 +276,5 @@ def ros_main() -> None:
 
 
 app.on_startup(lambda: threading.Thread(target=ros_main).start())
-run.APP_IMPORT_STRING = f'{__name__}:app'  # ROS2 uses a non-standard module name, so we need to specify it here
+ui_run.APP_IMPORT_STRING = f'{__name__}:app'  # ROS2 uses a non-standard module name, so we need to specify it here
 ui.run(uvicorn_reload_dirs=str(Path(__file__).parent.resolve()), favicon='🤖')
