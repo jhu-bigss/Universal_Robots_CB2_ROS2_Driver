@@ -248,7 +248,6 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         arguments=["forward_position_controller", "-c", "/controller_manager", "--inactive"],
-        # arguments=["forward_position_controller", "-c", "/controller_manager "],
         output="screen",
     )
 

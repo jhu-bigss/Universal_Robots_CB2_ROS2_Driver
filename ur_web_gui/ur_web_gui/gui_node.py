@@ -141,7 +141,6 @@ class WebGuiNode(Node):
         self.declare_ros_parameter('ur_type', 'ur10e', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
         self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
-        # app.add_static_files('/static', local_directory=package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual')
         self.meshes_directory = package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual'
 
         self.free_joints = {}

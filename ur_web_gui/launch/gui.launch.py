@@ -8,6 +8,7 @@ def generate_launch_description():
             executable='ur_web_gui',
             parameters=[{
                 'ur_type': 'ur10e',
+                'robot_description_pkg_name': 'ur_description',
             }],
         ),
     ])

@@ -67,6 +67,7 @@ def generate_launch_description():
             description="Initially loaded robot controller.",
             choices=[
                 "joint_trajectory_controller",
+                "forward_position_controller",
             ],
         )
     )

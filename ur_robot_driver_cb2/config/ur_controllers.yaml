@@ -29,59 +29,19 @@ controller_manager:
     my_cartesian_motion_controller:
       type: "cartesian_motion_controller/CartesianMotionController"
     
-    pid:
-      type: "pid_controller/PidController"
-
-    forward_velocity_controller_pid:
+    forward_command_controller_velocity:
       type: forward_command_controller/ForwardCommandController
 
 
-pid:
+forward_command_controller_velocity:
   ros__parameters:
-    dof_names:
+    joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
       - elbow_joint
       - wrist_1_joint
       - wrist_2_joint
       - wrist_3_joint
-
-    command_interface: position
-
-    reference_and_state_interfaces:
-      # - position
-      - velocity
-
-    update_rate: 125
-
-    gains:
-      shoulder_pan_joint:  {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-      shoulder_lift_joint: {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-      elbow_joint:         {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-      wrist_1_joint:       {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-      wrist_2_joint:       {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-      wrist_3_joint:       {"p": 1.0, "i": 1.0, "d": 0.0, "i_clamp_min": -7.0, "i_clamp_max": 7.0, "antiwindup": true}
-
-# preceeding_forward_velocity_controller_pid:
-#   ros__parameters:
-#     joints:
-#       - pid/shoulder_pan_joint
-#       - pid/shoulder_lift_joint
-#       - pid/elbow_joint
-#       - pid/wrist_1_joint
-#       - pid/wrist_2_joint
-#       - pid/wrist_3_joint
-#     interface_name: velocity
-
-forward_velocity_controller_pid:
-  ros__parameters:
-    joints:
-      - pid/shoulder_pan_joint
-      - pid/shoulder_lift_joint
-      - pid/elbow_joint
-      - pid/wrist_1_joint
-      - pid/wrist_2_joint
-      - pid/wrist_3_joint
     interface_name: velocity
 
 speed_scaling_state_broadcaster:
