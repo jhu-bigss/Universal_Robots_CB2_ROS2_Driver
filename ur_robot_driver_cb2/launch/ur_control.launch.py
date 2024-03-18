@@ -57,7 +57,6 @@ def launch_setup(context, *args, **kwargs):
     initial_joint_controller = LaunchConfiguration("initial_joint_controller")
     launch_rviz = LaunchConfiguration("launch_rviz")
     headless_mode = LaunchConfiguration("headless_mode")
-    launch_dashboard_client = LaunchConfiguration("launch_dashboard_client")
     use_tool_communication = LaunchConfiguration("use_tool_communication")
     tool_parity = LaunchConfiguration("tool_parity")
     tool_baud_rate = LaunchConfiguration("tool_baud_rate")
@@ -184,7 +183,7 @@ def launch_setup(context, *args, **kwargs):
 
     robot_description = {"robot_description": robot_description_content}
 
-    initial_joint_controllers = PathJoinSubstitution(
+    controllers_config_file = PathJoinSubstitution(
         [FindPackageShare(runtime_config_package), "config", controllers_file]
     )
 
@@ -203,8 +202,9 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="ros2_control_node",
         # arguments=['--ros-args', '--log-level', "debug"],
-        parameters=[robot_description, update_rate_config_file, initial_joint_controllers],
         output="screen",
+        parameters=[robot_description, update_rate_config_file, controllers_config_file],
+        remappings=[("motion_control_handle/target_frame", "cartesian_motion_controller/target_frame")],
     )
 
 
@@ -272,6 +272,14 @@ def launch_setup(context, *args, **kwargs):
         arguments=[initial_joint_controller, "-c", "/controller_manager"],
     )
 
+    rviz_config_file = PathJoinSubstitution([FindPackageShare("ur_description"), "rviz", "view_robot.rviz"])
+
+    rviz_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        arguments=["-d", rviz_config_file],
+        condition=IfCondition(launch_rviz),
+    )
 
     nodes_to_start = [
         control_node,
@@ -283,6 +291,7 @@ def launch_setup(context, *args, **kwargs):
         # cart_position_controller_spawner,
         # forward_position_controller_spawner,
         initial_joint_controller_spawner,
+        rviz_node,
     ]
 
     return nodes_to_start
@@ -390,17 +399,12 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="joint_trajectory_controller",
+            default_value="forward_position_controller",
             description="Initially loaded robot controller.",
         )
     )
     declared_arguments.append(
-        DeclareLaunchArgument("launch_rviz", default_value="true", description="Launch RViz?")
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "launch_dashboard_client", default_value="true", description="Launch Dashboard Client?"
-        )
+        DeclareLaunchArgument("launch_rviz", default_value="false", description="Launch RViz?")
     )
     declared_arguments.append(
         DeclareLaunchArgument(

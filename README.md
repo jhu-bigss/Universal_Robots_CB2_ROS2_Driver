@@ -93,3 +93,10 @@ Set `cb2_controller:=true` when generating the robot description:
         ]
     )
 ```
+## Cartesian Motion Control
+
+Clone the [cartesian_controllers](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers) (ros2) package into your src folder and build it in release mode for faster performance. (skip the simulation and tests)
+
+```bash
+colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
+```

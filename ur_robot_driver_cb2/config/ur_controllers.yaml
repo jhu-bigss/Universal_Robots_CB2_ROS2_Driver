@@ -26,8 +26,11 @@ controller_manager:
     forward_position_controller:
       type: position_controllers/JointGroupPositionController
 
-    my_cartesian_motion_controller:
-      type: "cartesian_motion_controller/CartesianMotionController"
+    cartesian_motion_controller:
+      type: cartesian_motion_controller/CartesianMotionController
+
+    motion_control_handle:
+      type: cartesian_controller_handles/MotionControlHandle
     
     forward_command_controller_velocity:
       type: forward_command_controller/ForwardCommandController
@@ -119,12 +122,10 @@ forward_position_controller:
       - wrist_2_joint
       - wrist_3_joint
 
-my_cartesian_motion_controller:
+cartesian_motion_controller:
   ros__parameters:
     end_effector_link: "tool0"
     robot_base_link: "base_link"
-    #NOTUSED target_frame
-    target_frame_topic: "target_frame"
     joints:
     - shoulder_pan_joint
     - shoulder_lift_joint
@@ -135,11 +136,30 @@ my_cartesian_motion_controller:
     
     command_interfaces:
       - position
+      # - velocity
+
+    solver:
+        error_scale: 100.0
+        iterations: 20
+        publish_state_feedback: True
 
     pd_gains:
-        trans_x: {p: 100.0}
-        trans_y: {p: 100.0}
-        trans_z: {p: 100.0}
-        rot_x: {p: 20.0}
-        rot_y: {p: 20.0}
-        rot_z: {p: 20.0}
+        trans_x: {p: 1.0}
+        trans_y: {p: 1.0}
+        trans_z: {p: 1.0}
+        rot_x: {p: 0.5}
+        rot_y: {p: 0.5}
+        rot_z: {p: 0.5}
+
+motion_control_handle:
+  ros__parameters:
+    end_effector_link: "tool0"
+    robot_base_link: "base_link"
+    ft_sensor_ref_link: "tool0"
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint
