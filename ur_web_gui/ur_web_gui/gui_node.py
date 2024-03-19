@@ -35,11 +35,46 @@ def _convert_to_rad(value):
 
 class WebGuiNode(Node):
 
+    def __init__(self, description_file ):
+        super().__init__('ur_web_gui', automatically_declare_parameters_from_overrides=True)
+
+        self.declare_ros_parameter('ur_type', 'ur10e', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
+        self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
+        package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
+        self.meshes_directory = package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual'
+
+        self.free_joints = {}
+        self.joint_list = []
+        self.visual_links = {}
+        self.link_list = []
+        self.kdl_chain = None
+        self.kdl_joints = kdl.JntArray(6) # 6 joints by default
+        self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
+        self.ui_configured = False
+
+        if description_file is not None:
+            # If we were given a URDF file on the command-line, use that.
+            with open(description_file, 'r') as infp:
+                description = infp.read()
+            self.configure_robot(description)
+        else:
+            self.get_logger().info(
+                'Waiting for robot_description to be published on the robot_description topic...')
+
+        qos = rclpy.qos.QoSProfile(depth=1,
+                                   durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL)
+        self.sub_robot_description = self.create_subscription(String,
+                                 'robot_description',
+                                 lambda msg: self.robot_description_cb(msg),
+                                 qos)
+        self.sub_jnt_states = self.create_subscription(JointState, 'joint_states', self.joint_states_callback, qos)
+        self.pub_cmd_fwd_pos_controller = self.create_publisher(Float64MultiArray, 'forward_position_controller/commands', qos)
+
     def init_urdf(self, xmldom):
         free_joints = {}
         joint_list = []
-        links = {}
-        visual_link_list = []
+        visual_links = {}
+        link_list = []
 
         robot_list = xmldom.getElementsByTagName('robot')
         if not robot_list:
@@ -50,11 +85,11 @@ class WebGuiNode(Node):
             if child.nodeType is child.TEXT_NODE:
                 continue
             if child.localName == 'link':
+                name = child.getAttribute('name')
+                link_list.append(name)
                 if child.getElementsByTagName('visual').length == 0:
                     continue
-                name = child.getAttribute('name')
-                visual_link_list.append(name)
-                links[name] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
+                visual_links[name] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
                                'rpy': [float(n) for n in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('rpy').split(" ")]}
             if child.localName == 'joint':
                 jtype = child.getAttribute('type')
@@ -99,12 +134,12 @@ class WebGuiNode(Node):
                     joint['continuous'] = True
                 free_joints[name] = joint
 
-        return (free_joints, joint_list, links, visual_link_list)
+        return (free_joints, joint_list, visual_links, link_list)
 
     def configure_robot(self, description):
         self.get_logger().debug('Got description, configuring robot')
         xmldom = xml.dom.minidom.parseString(description)
-        (self.free_joints, self.joint_list, self.links, self.link_list) = self.init_urdf(xmldom)
+        (self.free_joints, self.joint_list, self.visual_links, self.link_list) = self.init_urdf(xmldom)
 
         # configure the robot kinematics using PyKDL
         flag, kdl_tree = kdl_parser.treeFromString(description)
@@ -134,41 +169,6 @@ class WebGuiNode(Node):
             self.configure_robot(msg.data)
         except Exception as e:
             self.get_logger().warn(str(e))
-
-    def __init__(self, description_file ):
-        super().__init__('ur_web_gui', automatically_declare_parameters_from_overrides=True)
-
-        self.declare_ros_parameter('ur_type', 'ur10e', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot type'))
-        self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
-        package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
-        self.meshes_directory = package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual'
-
-        self.free_joints = {}
-        self.joint_list = []
-        self.links = {}
-        self.link_list = []
-        self.kdl_chain = None
-        self.kdl_joints = kdl.JntArray(6) # 6 joints by default
-        self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
-        self.ui_configured = False
-
-        if description_file is not None:
-            # If we were given a URDF file on the command-line, use that.
-            with open(description_file, 'r') as infp:
-                description = infp.read()
-            self.configure_robot(description)
-        else:
-            self.get_logger().info(
-                'Waiting for robot_description to be published on the robot_description topic...')
-
-        qos = rclpy.qos.QoSProfile(depth=1,
-                                   durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL)
-        self.sub_robot_description = self.create_subscription(String,
-                                 'robot_description',
-                                 lambda msg: self.robot_description_cb(msg),
-                                 qos)
-        self.sub_jnt_states = self.create_subscription(JointState, 'joint_states', self.joint_states_callback, qos)
-        self.pub_cmd_fwd_pos_controller = self.create_publisher(Float64MultiArray, 'forward_position_controller/commands', qos)
 
     def configure_ui(self):
         # Web GUI
@@ -200,13 +200,17 @@ class WebGuiNode(Node):
                     ui.label('Visualization').classes('text-2xl')
                     with ui.scene(500, 500) as scene:
                         # Note: the official ur_description package uses dae files, you need to convert them to glb files in order to show textures
-                        self.links['base_link_inertia']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/base.glb'))
-                        self.links['shoulder_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/shoulder.glb'))
-                        self.links['upper_arm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/upperarm.glb'))
-                        self.links['forearm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/forearm.glb'))
-                        self.links['wrist_1_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist1.glb'))
-                        self.links['wrist_2_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist2.glb'))
-                        self.links['wrist_3_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist3.glb'))
+                        self.visual_links['base_link_inertia']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/base.glb'))
+                        self.visual_links['shoulder_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/shoulder.glb'))
+                        self.visual_links['upper_arm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/upperarm.glb'))
+                        self.visual_links['forearm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/forearm.glb'))
+                        self.visual_links['wrist_1_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist1.glb'))
+                        self.visual_links['wrist_2_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist2.glb'))
+                        self.visual_links['wrist_3_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist3.glb'))
+                        # with scene.group() as self.visual_links['ee_link']['mesh']:
+                        #     scene.cylinder(0.05, 0.05, 0.1, color='red').rotate(0, math.pi / 2, 0)
+                        #     scene.cylinder(0.05, 0.05, 0.1, color='green').rotate(-math.pi / 2, 0, 0)
+                        #     scene.cylinder(0.05, 0.05, 0.1, color='blue')
 
         self.ui_configured = True
 
@@ -214,9 +218,6 @@ class WebGuiNode(Node):
         if len(self.joint_list) == len(msg.name):
             for i, name in enumerate(msg.name):
                 self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(msg.position[i])
-
-        if self.ui_configured:
-            self.update_visualization()
 
     def control_on_switch_cb(self, e):
         if e.value:
@@ -230,25 +231,31 @@ class WebGuiNode(Node):
         for i, joint in enumerate(self.joint_list):
             self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
 
+        # update the visualization when slider value changes
+        if self.ui_configured:
+            self.update_visualization()
+
         # if real-time jogging is ON, publish the joint positions right away
         if self.realtime_jog_switch.value:
             self.publish_fwd_pos_controller()
+
+    def update_visualization(self):
+        i = 0
+        for j, link in enumerate(self.link_list):
+            if link in self.visual_links.keys():
+                self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], j) # get transformation T from world to link
+                T = kdl.Frame(kdl.Rotation.RPY(*self.visual_links[link]['rpy']), kdl.Vector(*self.visual_links[link]['xyz'])) # get the visual offset
+                T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
+                T = self.T[i] * T # where magic happens
+                self.visual_links[link]['mesh'].rotate(*T.M.GetRPY())
+                self.visual_links[link]['mesh'].move(*T.p)
+                i += 1
 
     def publish_fwd_pos_controller(self):
         msg = Float64MultiArray()
         for joint in self.joint_list:
             msg.data.append(_convert_to_rad(self.free_joints[joint]['desired_position_in_deg']))
-
         self.pub_cmd_fwd_pos_controller.publish(msg)
-
-    def update_visualization(self):
-        for i, link in enumerate(self.link_list):
-            self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], i)
-            T = kdl.Frame(kdl.Rotation.RPY(*self.links[link]['rpy']), kdl.Vector(*self.links[link]['xyz']))
-            T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
-            T = self.T[i] * T # where magic happens
-            self.links[link]['mesh'].rotate(*T.M.GetRPY())
-            self.links[link]['mesh'].move(*T.p)
 
 def main() -> None:
     # NOTE: This function is defined as the ROS entry point in setup.py, but it's empty to enable NiceGUI auto-reloading
