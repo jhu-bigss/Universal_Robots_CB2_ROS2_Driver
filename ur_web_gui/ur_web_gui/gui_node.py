@@ -42,14 +42,15 @@ class WebGuiNode(Node):
         self.declare_ros_parameter('robot_description_pkg_name', 'ur_description', ParameterDescriptor(type=ParameterType.PARAMETER_STRING, description='robot description package name'))
         package_share_directory = get_package_share_directory(self.get_parameter('robot_description_pkg_name').value)
         self.meshes_directory = package_share_directory + '/meshes/' + self.get_parameter('ur_type').value + '/visual'
+        self.declare_ros_parameter('interactive_marker_size', 0.1, ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE, description='draggable interactive marker size'))
+        self.interactive_marker_size = self.get_parameter('interactive_marker_size').value
 
         self.free_joints = {}
         self.joint_list = []
         self.visual_links = {}
-        self.link_list = []
-        self.kdl_chain = None
-        self.kdl_joints = kdl.JntArray(6) # 6 joints by default
-        self.T = [kdl.Frame() for i in range(7)] # 7 links by default including the base_link
+        self.base_link_name = 'base_link'
+        self.tool_link_name = 'tool0'
+        self.T = [kdl.Frame() for i in range(8)] # 8 links by default: 1 base_link + 6 robot links + 1 tool0_link
         self.ui_configured = False
 
         if description_file is not None:
@@ -74,7 +75,6 @@ class WebGuiNode(Node):
         free_joints = {}
         joint_list = []
         visual_links = {}
-        link_list = []
 
         robot_list = xmldom.getElementsByTagName('robot')
         if not robot_list:
@@ -86,7 +86,8 @@ class WebGuiNode(Node):
                 continue
             if child.localName == 'link':
                 name = child.getAttribute('name')
-                link_list.append(name)
+                if name == self.tool_link_name:
+                    visual_links[name] = {'xyz': [0.0, 0.0, 0.0], 'rpy': [0.0, 0.0, 0.0]}
                 if child.getElementsByTagName('visual').length == 0:
                     continue
                 visual_links[name] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
@@ -134,17 +135,19 @@ class WebGuiNode(Node):
                     joint['continuous'] = True
                 free_joints[name] = joint
 
-        return (free_joints, joint_list, visual_links, link_list)
+        return (free_joints, joint_list, visual_links)
 
     def configure_robot(self, description):
         self.get_logger().debug('Got description, configuring robot')
         xmldom = xml.dom.minidom.parseString(description)
-        (self.free_joints, self.joint_list, self.visual_links, self.link_list) = self.init_urdf(xmldom)
+        (self.free_joints, self.joint_list, self.visual_links) = self.init_urdf(xmldom)
 
         # configure the robot kinematics using PyKDL
         flag, kdl_tree = kdl_parser.treeFromString(description)
-        self.kdl_chain = kdl_tree.getChain(self.link_list[0], self.link_list[-1])
+        self.kdl_chain = kdl_tree.getChain(self.base_link_name, self.tool_link_name)
         self.kdl_joints = kdl.JntArray(self.kdl_chain.getNrOfJoints())
+        self.link_list = [self.kdl_chain.getSegment(i).getName() for i in range(self.kdl_chain.getNrOfSegments())] # somehow base_link is not included
+        self.link_list.insert(0, self.base_link_name) # add the base_link to the beginning of the list
         self.kdl_fk_solver = kdl.ChainFkSolverPos_recursive(self.kdl_chain)
 
         # configure the UI
@@ -177,14 +180,14 @@ class WebGuiNode(Node):
             with ui.row().classes('items-stretch'):
                 with ui.card().classes('w-300 text-center items-center'):
                     ui.label('Joint Control').classes('text-2xl')
-                    self.control_on_switch = ui.switch('Remote Control', on_change=lambda e: self.control_on_switch_cb(e))
+                    self.control_on_switch = ui.switch('Remote Control')
                     self.realtime_jog_switch = ui.switch('Real-time')
                     ui.label('Real-time jogging is ON! Please be careful!').classes('text-xs text-red-500').bind_visibility_from(self.realtime_jog_switch, 'value')
                     for j in self.joint_list:
                         joint = self.free_joints[j]
                         ui.label(j).classes('text-l text-bold')
                         joint["ui_label"] = ui.label().classes('mb-[-1.4em]').bind_text_from(joint, 'current_position_in_deg', lambda x: "%.2f" % x + "°")
-                        joint["ui_slider"] = ui.slider(min=joint['min'], max=joint['max'], step=0.1, on_change=self.set_desired_joint_positions) \
+                        joint["ui_slider"] = ui.slider(min=joint['min'], max=joint['max'], step=0.1, on_change=self.ui_slider_value_changed_cb) \
                             .props('label').on('update:model-value', throttle=1.0, leading_events=False) \
                             .bind_value(joint, 'desired_position_in_deg').bind_enabled_from(self.control_on_switch, 'value')
 
@@ -207,10 +210,11 @@ class WebGuiNode(Node):
                         self.visual_links['wrist_1_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist1.glb'))
                         self.visual_links['wrist_2_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist2.glb'))
                         self.visual_links['wrist_3_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist3.glb'))
-                        # with scene.group() as self.visual_links['ee_link']['mesh']:
-                        #     scene.cylinder(0.05, 0.05, 0.1, color='red').rotate(0, math.pi / 2, 0)
-                        #     scene.cylinder(0.05, 0.05, 0.1, color='green').rotate(-math.pi / 2, 0, 0)
-                        #     scene.cylinder(0.05, 0.05, 0.1, color='blue')
+                        # self.visual_links['tool0']['mesh'] = scene.cylinder(0.005, 0.005, 0.1).material('red')
+                        with scene.group() as self.visual_links['tool0']['mesh']:
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(self.interactive_marker_size/2, 0, 0).rotate(0, 0, math.pi / 2).material('red')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, -self.interactive_marker_size/2, 0).rotate(0, math.pi / 2, 0).material('green')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, 0, -self.interactive_marker_size/2).rotate(-math.pi / 2, 0, 0).material('blue')
 
         self.ui_configured = True
 
@@ -219,19 +223,17 @@ class WebGuiNode(Node):
             for i, name in enumerate(msg.name):
                 self.free_joints[name]['current_position_in_deg'] = _convert_to_deg(msg.position[i])
 
-    def control_on_switch_cb(self, e):
-        if e.value:
+        # if control_on_switch is OFF (view mode), update the visualization by resetting the desired_joint_positions
+        if self.ui_configured is True and self.control_on_switch.value is False:
             self.reset_desired_joint_positions()
+            self.update_visualization()
 
     def reset_desired_joint_positions(self):
         for joint in self.joint_list:
             self.free_joints[joint]['desired_position_in_deg'] = self.free_joints[joint]['current_position_in_deg']
 
-    def set_desired_joint_positions(self):
-        for i, joint in enumerate(self.joint_list):
-            self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
-
-        # update the visualization when slider value changes
+    def ui_slider_value_changed_cb(self):
+        # update the visualization
         if self.ui_configured:
             self.update_visualization()
 
@@ -240,13 +242,18 @@ class WebGuiNode(Node):
             self.publish_fwd_pos_controller()
 
     def update_visualization(self):
+        # update the kinematics joints
+        for i, joint in enumerate(self.joint_list):
+            self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
+
+        # update the kinematics links
         i = 0
         for j, link in enumerate(self.link_list):
             if link in self.visual_links.keys():
                 self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], j) # get transformation T from world to link
                 T = kdl.Frame(kdl.Rotation.RPY(*self.visual_links[link]['rpy']), kdl.Vector(*self.visual_links[link]['xyz'])) # get the visual offset
                 T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
-                T = self.T[i] * T # where magic happens
+                T = self.T[i] * T # right-multiply -> the offset transformation takes place w.r.t. body frame
                 self.visual_links[link]['mesh'].rotate(*T.M.GetRPY())
                 self.visual_links[link]['mesh'].move(*T.p)
                 i += 1
