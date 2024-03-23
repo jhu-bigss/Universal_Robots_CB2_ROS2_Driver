@@ -48,9 +48,10 @@ class WebGuiNode(Node):
         self.free_joints = {}
         self.joint_list = []
         self.visual_links = {}
-        self.base_link_name = 'base_link'
+        self.base_link_name = 'base'
         self.tool_link_name = 'tool0'
-        self.T = [kdl.Frame() for i in range(8)] # 8 links by default: 1 base_link + 6 robot links + 1 tool0_link
+        self.tool_position = {'position_in_mm': [0.0, 0.0, 0.0], 'orientation_axis_in_rad': [0.0, 0.0, 0.0]}
+        self.T = [kdl.Frame() for i in range(10)] # 9 links by default: 1 base_link (invisible) + 1 base_link_initia (visibal) + 6 robot links (visible) + 1 flange + 1 tool0_link (invisible)
         self.ui_configured = False
 
         if description_file is not None:
@@ -86,8 +87,8 @@ class WebGuiNode(Node):
                 continue
             if child.localName == 'link':
                 name = child.getAttribute('name')
-                if name == self.tool_link_name:
-                    visual_links[name] = {'xyz': [0.0, 0.0, 0.0], 'rpy': [0.0, 0.0, 0.0]}
+                if name == self.base_link_name or name == self.tool_link_name:
+                    visual_links[name] = {}
                 if child.getElementsByTagName('visual').length == 0:
                     continue
                 visual_links[name] = {'xyz': [float(m) for m in child.getElementsByTagName('visual').item(0).getElementsByTagName('origin').item(0).getAttribute('xyz').split(" ")],
@@ -147,7 +148,6 @@ class WebGuiNode(Node):
         self.kdl_chain = kdl_tree.getChain(self.base_link_name, self.tool_link_name)
         self.kdl_joints = kdl.JntArray(self.kdl_chain.getNrOfJoints())
         self.link_list = [self.kdl_chain.getSegment(i).getName() for i in range(self.kdl_chain.getNrOfSegments())] # somehow base_link is not included
-        self.link_list.insert(0, self.base_link_name) # add the base_link to the beginning of the list
         self.kdl_fk_solver = kdl.ChainFkSolverPos_recursive(self.kdl_chain)
 
         # configure the UI
@@ -195,14 +195,17 @@ class WebGuiNode(Node):
                     ui.button('Reset', on_click=self.reset_desired_joint_positions).bind_enabled_from(self.control_on_switch, 'value')
                     ui.button('Send Commands', on_click=self.publish_fwd_pos_controller).bind_enabled_from(self.control_on_switch, 'value')
 
-                # Cartesian Control
-                # TODO: Implement Cartesian Control
-
                 # Visualization
                 with ui.card().classes('w-300 h-300 items-center'):
                     ui.label('Visualization').classes('text-2xl')
-                    with ui.scene(500, 500) as scene:
+                    with ui.scene(width=500, height=500) as scene:
                         # Note: the official ur_description package uses dae files, you need to convert them to glb files in order to show textures
+                        with scene.group() as self.visual_links['base']['mesh']:
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(self.interactive_marker_size/2, 0, 0).rotate(0, 0, math.pi / 2).material('red')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, self.interactive_marker_size/2, 0).rotate(0, math.pi / 2, 0).material('green')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, 0, self.interactive_marker_size/2).rotate(-math.pi / 2, 0, 0).material('blue')
+                            scene.sphere(self.interactive_marker_size/15).material('gray')
+
                         self.visual_links['base_link_inertia']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/base.glb'))
                         self.visual_links['shoulder_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/shoulder.glb'))
                         self.visual_links['upper_arm_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/upperarm.glb'))
@@ -210,11 +213,26 @@ class WebGuiNode(Node):
                         self.visual_links['wrist_1_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist1.glb'))
                         self.visual_links['wrist_2_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist2.glb'))
                         self.visual_links['wrist_3_link']['mesh'] = scene.gltf(app.add_static_file(local_file=self.meshes_directory + '/wrist3.glb'))
-                        # self.visual_links['tool0']['mesh'] = scene.cylinder(0.005, 0.005, 0.1).material('red')
+
                         with scene.group() as self.visual_links['tool0']['mesh']:
                             scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(self.interactive_marker_size/2, 0, 0).rotate(0, 0, math.pi / 2).material('red')
-                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, -self.interactive_marker_size/2, 0).rotate(0, math.pi / 2, 0).material('green')
-                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, 0, -self.interactive_marker_size/2).rotate(-math.pi / 2, 0, 0).material('blue')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, self.interactive_marker_size/2, 0).rotate(0, math.pi / 2, 0).material('green')
+                            scene.cylinder(self.interactive_marker_size/20, self.interactive_marker_size/20, self.interactive_marker_size).move(0, 0, self.interactive_marker_size/2).rotate(-math.pi / 2, 0, 0).material('blue')
+                            scene.sphere(self.interactive_marker_size/15).material('yellow')
+
+                with ui.card().classes('w-300 text-center items-center'):
+                    ui.label('Tool Position').classes('text-2xl')
+                    ui.label('Position').classes('text-l text-bold')
+                    with ui.column():
+                        ui.label('x').bind_text_from(self.tool_position, 'position_in_mm', lambda x: "x: %.2f mm" % x[0])
+                        ui.label('y').bind_text_from(self.tool_position, 'position_in_mm', lambda x: "y: %.2f mm" % x[1])
+                        ui.label('z').bind_text_from(self.tool_position, 'position_in_mm', lambda x: "z: %.2f mm" % x[2])
+
+                    ui.label('Orientation').classes('text-l text-bold')
+                    with ui.column():
+                        ui.label('Rx').bind_text_from(self.tool_position, 'orientation_axis_in_rad', lambda x: "Rx: %.3f rad" % x[0])
+                        ui.label('Ry').bind_text_from(self.tool_position, 'orientation_axis_in_rad', lambda x: "Ry: %.3f rad" % x[1])
+                        ui.label('Rz').bind_text_from(self.tool_position, 'orientation_axis_in_rad', lambda x: "Rz: %.3f rad" % x[2])
 
         self.ui_configured = True
 
@@ -247,16 +265,21 @@ class WebGuiNode(Node):
             self.kdl_joints[i] = _convert_to_rad(self.free_joints[joint]['desired_position_in_deg'])
 
         # update the kinematics links
-        i = 0
-        for j, link in enumerate(self.link_list):
+        for i, link in enumerate(self.link_list):
+            self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], i+1) # get transformation T from base_link to link
             if link in self.visual_links.keys():
-                self.kdl_fk_solver.JntToCart(self.kdl_joints, self.T[i], j) # get transformation T from world to link
-                T = kdl.Frame(kdl.Rotation.RPY(*self.visual_links[link]['rpy']), kdl.Vector(*self.visual_links[link]['xyz'])) # get the visual offset
-                T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
-                T = self.T[i] * T # right-multiply -> the offset transformation takes place w.r.t. body frame
+                if 'rpy' in self.visual_links[link]:
+                    T = kdl.Frame(kdl.Rotation.RPY(*self.visual_links[link]['rpy']), kdl.Vector(*self.visual_links[link]['xyz'])) # get the visual offset
+                    T = T * kdl.Frame(kdl.Rotation.RotX(math.pi), kdl.Vector(0, 0, 0)) # required if input file is glTF, comment out this line if input file is STL
+                    T = self.T[i] * T # right-multiply -> the offset transformation takes place w.r.t. body frame
+                else:
+                    T = self.T[i]
                 self.visual_links[link]['mesh'].rotate(*T.M.GetRPY())
                 self.visual_links[link]['mesh'].move(*T.p)
-                i += 1
+                # update the tool position
+                if link == self.tool_link_name:
+                    self.tool_position['position_in_mm'] = T.p * 1000
+                    self.tool_position['orientation_axis_in_rad'] = T.M.GetRot()
 
     def publish_fwd_pos_controller(self):
         msg = Float64MultiArray()
