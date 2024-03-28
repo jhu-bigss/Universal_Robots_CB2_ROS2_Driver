@@ -63,11 +63,12 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="joint_trajectory_controller",
+            default_value="forward_position_controller",
             description="Initially loaded robot controller.",
             choices=[
                 "joint_trajectory_controller",
                 "forward_position_controller",
+                "cartesian_motion_controller"
             ],
         )
     )

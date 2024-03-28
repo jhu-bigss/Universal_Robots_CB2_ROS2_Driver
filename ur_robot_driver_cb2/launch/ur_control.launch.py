@@ -82,82 +82,6 @@ def launch_setup(context, *args, **kwargs):
     )
 
 
-    # robot_description_content = Command(
-    #     [
-    #         PathJoinSubstitution([FindExecutable(name="xacro")]),
-    #         " ",
-    #         PathJoinSubstitution([FindPackageShare("ur_robot_driver_cb2"), "urdf", description_file]),
-    #         " ",
-    #         "robot_ip:=",
-    #         robot_ip,
-    #         " ",
-    #         "joint_limit_params:=",
-    #         joint_limit_params,
-    #         " ",
-    #         "kinematics_params:=",
-    #         kinematics_params,
-    #         " ",
-    #         "physical_params:=",
-    #         physical_params,
-    #         " ",
-    #         "visual_params:=",
-    #         visual_params,
-    #         " ",
-    #         "safety_limits:=",
-    #         safety_limits,
-    #         " ",
-    #         "safety_pos_margin:=",
-    #         safety_pos_margin,
-    #         " ",
-    #         "safety_k_position:=",
-    #         safety_k_position,
-    #         " ",
-    #         "name:=",
-    #         ur_type,
-    #         " ",
-    #         "prefix:=",
-    #         prefix,
-    #         " ",
-    #         "use_fake_hardware:=",
-    #         use_fake_hardware,
-    #         " ",
-    #         "fake_sensor_commands:=",
-    #         fake_sensor_commands,
-    #         " ",
-    #         "headless_mode:=",
-    #         headless_mode,
-    #         " ",
-    #         "use_tool_communication:=",
-    #         use_tool_communication,
-    #         " ",
-    #         "tool_parity:=",
-    #         tool_parity,
-    #         " ",
-    #         "tool_baud_rate:=",
-    #         tool_baud_rate,
-    #         " ",
-    #         "tool_stop_bits:=",
-    #         tool_stop_bits,
-    #         " ",
-    #         "tool_rx_idle_chars:=",
-    #         tool_rx_idle_chars,
-    #         " ",
-    #         "tool_tx_idle_chars:=",
-    #         tool_tx_idle_chars,
-    #         " ",
-    #         "tool_device_name:=",
-    #         tool_device_name,
-    #         " ",
-    #         "tool_tcp_port:=",
-    #         tool_tcp_port,
-    #         " ",
-    #         "tool_voltage:=",
-    #         tool_voltage,
-    #         " ",
-    #     ]
-    # )
-    # robot_description = {"robot_description": robot_description_content}
-
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -254,14 +178,21 @@ def launch_setup(context, *args, **kwargs):
     forward_velocity_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["forward_velocity_controller", "-c", "/controller_manager","--inactive"],
+        arguments=["forward_velocity_controller", "-c", "/controller_manager", "--inactive"],
         output="screen",
     )
 
-    cart_position_controller_spawner = Node(
+    cartesian_motion_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["my_cartesian_motion_controller", "-c", "/controller_manager"],
+        arguments=["cartesian_motion_controller", "-c", "/controller_manager", "--inactive"],
+        output="screen",
+    )
+
+    motion_control_handle_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["motion_control_handle", "-c", "/controller_manager", "--inactive"],
         output="screen",
     )
 
@@ -285,12 +216,9 @@ def launch_setup(context, *args, **kwargs):
         control_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
-        # speed_scaling_state_broadcaster_spawner,
-        # force_torque_sensor_broadcaster_spawner,
-        # forward_velocity_controller_spawner,
-        # cart_position_controller_spawner,
-        # forward_position_controller_spawner,
         initial_joint_controller_spawner,
+        cartesian_motion_controller_spawner,
+        motion_control_handle_spawner,
         rviz_node,
     ]
 

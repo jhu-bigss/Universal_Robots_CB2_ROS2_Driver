@@ -10,8 +10,6 @@
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
 
-  <depend>python-nicegui</depend>
-
   <depend>python3-pykdl</depend>
   <depend>kdl_parser_py</depend>
 

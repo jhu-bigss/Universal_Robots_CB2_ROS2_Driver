@@ -1,5 +1,11 @@
 # UR_WEB_GUI
 
+This package depends on [nicegui](https://nicegui.io/).
+
+```bash
+pip3 install nicegui
+```
+
 ## Requirements
 
 * clone [kdl_parser_py](https://github.com/ros/kdl_parser.git)
