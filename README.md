@@ -1,11 +1,12 @@
 # Universal_Robots_CB2_ROS2_Driver
 
-## To use this driver with the official [Universal_Robots_ROS2_Description](https://github.com/UniversalRobots/Universal_Robots_ROS2_Description), which you can install with the following command:
+## You can use this driver with the official [Universal_Robots_ROS2_Description](https://github.com/UniversalRobots/Universal_Robots_ROS2_Description), which you can install with the following command:
 
 ```bash
 sudo apt-get install ros-<distro>-ur-description
 ```
-You need to modify the URDF file within the package:
+
+However, you need to modify the URDF files within the package:
 
 ```
 colcon_cd ur_description
@@ -16,9 +17,9 @@ urdf
 └── ur.urdf.xacro
 ```
 
-### `ur.urdf.xacro` and `ur_macro.xacro`
+### `ur.urdf.xacro`
 
-add `cb2_controller` as a xacro input parameter argument:
+add `cb2_controller` as a xacro input parameter:
 
 ```xml
     <xacro:arg name="cb2_controller" default="false"/>
@@ -30,11 +31,13 @@ add `cb2_controller` as a xacro input parameter argument:
       cb2_controller="$(arg cb2_controller)"
       ...
 ```
+### `ur_macro.xacro`
+
+Do the same thing adding 'cb2_controller' as a xacro input parameter:
 
 ```xml
   <xacro:macro name="ur_robot" params="
     name
-    tf_prefix
     ...
     cb2_controller:=false
     ...
@@ -42,7 +45,6 @@ add `cb2_controller` as a xacro input parameter argument:
       <xacro:include filename="$(find ur_description)/urdf/ur.ros2_control.xacro" />
       <xacro:ur_ros2_control
         name="${name}"
-        use_fake_hardware="${use_fake_hardware}"
         ...
         cb2_controller="${cb2_controller}"
         ...
@@ -51,13 +53,24 @@ add `cb2_controller` as a xacro input parameter argument:
 
 ### `ur.ros2_control.xacro`
 
+Same thing here adding `cb2_controller` as a xacro input parameter:
+
+```xml
+  <xacro:macro name="ur_ros2_control" params="
+    name
+    use_fake_hardware:=false fake_sensor_commands:=false
+    ...
+    cb2_controller:=false
+    ">
+```
+
 change the plugin name from `ur_robot_driver` to `ur_robot_driver_cb2` as the following line:
 
 ```xml
     <plugin>ur_robot_driver_cb2/URPositionHardwareInterface</plugin>
 ```
 
-add the `cb2_controller` argument to `sensor` and `gpio` interface xacro:
+add the `cb2_controller` argument to the block that contains `tcp_fts_sensor` and `gpio` interface xacro so that everything within this block will be ignored when using `cb2_controller` because they are not yet implemented:
 
 ```xml
  <xacro:unless value="${sim_gazebo or sim_ignition or cb2_controller}">
@@ -67,7 +80,7 @@ so that you can use `cb2_controller` argument in your launch file to disable TCP
 
 ### launch file
 
-Set `cb2_controller:=true` when generating the robot description:
+Now, you can set `cb2_controller:=true` when generating the robot description in your launch file:
 
 ```python
     robot_description_content = Command(
