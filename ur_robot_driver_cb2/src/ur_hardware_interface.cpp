@@ -48,14 +48,14 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_init(const ha
 
   double max_payload=1;
   double max_acceleration=15;
-  m_max_velocity=10;
-  m_acceleration_coeff=2;
-  m_max_vel_change=max_acceleration/125;
-  m_curr2torque.resize(6);
+  max_velocity_=10;
+  acceleration_coeff_=2;
+  max_vel_change_=max_acceleration/125;
+  curr2torque_.resize(6);
     
   
   for (const hardware_interface::ComponentInfo& joint : info_.joints) {
-    m_joint_names.push_back(joint.name);
+    joint_names_.push_back(joint.name);
     if (joint.command_interfaces.size() != 2) {
       RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"),
                    "Joint '%s' has %zu command interfaces found. 2 expected.", joint.name.c_str(),
@@ -154,19 +154,26 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
 
 }
 
-hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::State& previous_state)
+hardware_interface::CallbackReturn URPositionHardwareInterface::on_configure(const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Configuring UR driver");
 
   std::string robot_ip   = info_.hardware_parameters["robot_ip"];
   int reverse_port       = stoi(info_.hardware_parameters["reverse_port"]);
 
   double max_payload     = 1.0;
 
-  m_driver.reset(new ur_robot_driver_cb2::UrDriver(m_rt_msg_cond, m_msg_cond, robot_ip, reverse_port,12,0,max_payload));
-  m_driver->setJointNames(m_joint_names);
+  ur_driver_.reset(new ur_robot_driver_cb2::UrDriver(rt_msg_cond_, msg_cond_, robot_ip, reverse_port,12,0,max_payload));
+  ur_driver_->setJointNames(joint_names_);
   
-  if (!m_driver->start())
+  return CallbackReturn::SUCCESS;
+}
+
+hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::State& previous_state)
+{
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting UR driver... please wait...");
+
+  if (!ur_driver_->start())
   {
     RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "Error creating connection");
     return CallbackReturn::ERROR;
@@ -175,7 +182,7 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(cons
   std::vector<double> pos_init;
   for (int i=0;i<100;i++)
   {
-    pos_init  = m_driver->rt_interface_->robot_state_->getQActual();
+    pos_init  = ur_driver_->rt_interface_->robot_state_->getQActual();
     for (unsigned int idx=0;idx<6;idx++)
       {
         // RCLCPP_WARN_STREAM(rclcpp::get_logger("URPositionHardwareInterface"), "Initial Position joint " << idx << ": " << pos_init.at(idx));
@@ -184,17 +191,16 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(cons
       }
   }
 
-  return CallbackReturn::SUCCESS;
-
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn URPositionHardwareInterface::on_deactivate(const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "stopping driver");
+  RCLCPP_WARN(rclcpp::get_logger("URPositionHardwareInterface"), "stopping UR driver");
   #ifdef LOG
   out.close();
   #endif
-  m_driver->halt();
+  ur_driver_->halt();
   return CallbackReturn::SUCCESS;
 }
 
@@ -202,10 +208,10 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
 {
   std::vector<double> pos, vel, eff, tcp;
 
-  pos             = m_driver->rt_interface_->robot_state_->getQActual();
-  vel             = m_driver->rt_interface_->robot_state_->getQdActual();
-  eff             = m_driver->rt_interface_->robot_state_->getIActual();
-  m_tcp_force     = m_driver->rt_interface_->robot_state_->getTcpForce();
+  pos             = ur_driver_->rt_interface_->robot_state_->getQActual();
+  vel             = ur_driver_->rt_interface_->robot_state_->getQdActual();
+  eff             = ur_driver_->rt_interface_->robot_state_->getIActual();
+  tcp_force_     = ur_driver_->rt_interface_->robot_state_->getTcpForce();
 
   #ifdef LOG
   auto p1 = std::chrono::system_clock::now();
@@ -216,8 +222,8 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
   {
     urcl_joint_positions_.at(idx)=pos.at(idx);
     urcl_joint_velocities_.at(idx)=vel.at(idx);
-    urcl_joint_efforts_.at(idx)=eff.at(idx);//*m_curr2torque.at(idx);
-    urcl_ft_sensor_measurements_.at(idx)=m_tcp_force.at(idx);
+    urcl_joint_efforts_.at(idx)=eff.at(idx);//*curr2torque_.at(idx);
+    urcl_ft_sensor_measurements_.at(idx)=tcp_force_.at(idx);
   }
 
   return hardware_interface::return_type::OK;
@@ -228,7 +234,7 @@ hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp:
 {
 
   if (position_controller_running_) {
-    m_driver->setPosition(urcl_position_commands_.at(0),urcl_position_commands_.at(1),urcl_position_commands_.at(2)
+    ur_driver_->setPosition(urcl_position_commands_.at(0),urcl_position_commands_.at(1),urcl_position_commands_.at(2)
                           ,urcl_position_commands_.at(3),urcl_position_commands_.at(4),urcl_position_commands_.at(5)
                           // ,0.008,0.1,300);
                           ,0.016,0.05,700);
@@ -237,21 +243,20 @@ hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp:
 
   } else if (velocity_controller_running_) {
     // RCLCPP_FATAL(rclcpp::get_logger("URPositionHardwareInterface"), "SPEED not yet tested");
-    m_driver->setSpeed(urcl_velocity_commands_.at(0), urcl_velocity_commands_.at(1), urcl_velocity_commands_.at(2)
+    ur_driver_->setSpeed(urcl_velocity_commands_.at(0), urcl_velocity_commands_.at(1), urcl_velocity_commands_.at(2)
                       , urcl_velocity_commands_.at(3), urcl_velocity_commands_.at(4), urcl_velocity_commands_.at(5)
                       ,  0.5);
     // std::cout << "MEGAOUT" << urcl_velocity_commands_.at(0) <<" " << urcl_velocity_commands_.at(1)<<" " << urcl_velocity_commands_.at(2)<<" " << urcl_velocity_commands_.at(3)
                           //  <<" " << urcl_velocity_commands_.at(4)<<" " << urcl_velocity_commands_.at(5)<<" " <<"\n" << std::flush;	
 
     // else {
-    //   m_driver->writeKeepalive();
+    //   ur_driver_->writeKeepalive();
     // }
     //TODO
 
   }
 
   return hardware_interface::return_type::OK;
-
 }
 
 hardware_interface::return_type URPositionHardwareInterface::prepare_command_mode_switch(const std::vector<std::string>& start_interfaces, const std::vector<std::string>& stop_interfaces)

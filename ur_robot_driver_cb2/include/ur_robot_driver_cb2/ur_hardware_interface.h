@@ -56,17 +56,18 @@ namespace ur_robot_driver_cb2
     {
     };
 
+    hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) final;
+
     std::vector<hardware_interface::StateInterface> export_state_interfaces() final;
 
     std::vector<hardware_interface::CommandInterface> export_command_interfaces() final;
 
+    hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) final;
     hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) final;
     hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) final;
 
     hardware_interface::return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) final;
     hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) final;
-    
-    hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) final;
     
     hardware_interface::return_type prepare_command_mode_switch(const std::vector<std::string>& start_interfaces,
                                                               const std::vector<std::string>& stop_interfaces) final;
@@ -92,10 +93,10 @@ namespace ur_robot_driver_cb2
 
     double speed_scaling_combined_;
 
-    std::vector<std::string> m_joint_names;//TODO
+    std::vector<std::string> joint_names_;
     
-    std::vector<double> m_tcp_force;
-    std::vector<double> m_curr2torque;
+    std::vector<double> tcp_force_;
+    std::vector<double> curr2torque_;
     
     // uint32_t runtime_state_;
     PausingState pausing_state_;
@@ -105,13 +106,11 @@ namespace ur_robot_driver_cb2
     bool initialized_;
     std::ofstream out;
 
-
-    
     // UrDriver Variables
-    std::unique_ptr<ur_robot_driver_cb2::UrDriver> m_driver;
-    std::condition_variable m_rt_msg_cond;
-    std::condition_variable m_msg_cond;
-    int m_max_velocity;
+    std::unique_ptr<ur_robot_driver_cb2::UrDriver> ur_driver_;
+    std::condition_variable rt_msg_cond_;
+    std::condition_variable msg_cond_;
+    int max_velocity_;
     
     std::vector<uint> stop_modes_;
     std::vector<std::string> start_modes_;
@@ -123,17 +122,17 @@ namespace ur_robot_driver_cb2
     // unsigned int m_max_missing_messages;
     // bool m_topic_received;
     
-    double m_max_vel_change;
+    double max_vel_change_;
     
     // ros::Publisher m_target_pub;
     // ros::Publisher m_force_pub;
-    bool m_velocity_mode;
-    bool m_position_mode;
-    bool m_posvel_mode;
-    double m_max_accepted_deviation;
-    int m_servogain;
-    double m_lookahead;
-    int m_acceleration_coeff;
+    bool velocity_mode_;
+    bool position_mode_;
+    bool posvel_mode_;
+    double max_accepted_deviation_;
+    int servogain_;
+    double lookahead_;
+    int acceleration_coeff_;
     
   };
 }
