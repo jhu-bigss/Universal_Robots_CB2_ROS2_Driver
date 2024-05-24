@@ -30,7 +30,7 @@
 using vector6d_t = std::vector<double>;
 
 
-namespace ur_robot_driver_cb2
+namespace ur_robot_driver
 {
   
   enum class PausingState
@@ -107,7 +107,7 @@ namespace ur_robot_driver_cb2
     std::ofstream out;
 
     // UrDriver Variables
-    std::unique_ptr<ur_robot_driver_cb2::UrDriver> ur_driver_;
+    std::unique_ptr<ur_robot_driver::UrDriver> ur_driver_;
     std::condition_variable rt_msg_cond_;
     std::condition_variable msg_cond_;
     int max_velocity_;

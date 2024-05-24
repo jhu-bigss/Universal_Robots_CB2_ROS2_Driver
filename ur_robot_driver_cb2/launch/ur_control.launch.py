@@ -66,7 +66,6 @@ def launch_setup(context, *args, **kwargs):
     tool_device_name = LaunchConfiguration("tool_device_name")
     tool_tcp_port = LaunchConfiguration("tool_tcp_port")
     tool_voltage = LaunchConfiguration("tool_voltage")
-    cb2_controller = LaunchConfiguration("cb2_controller")
 
     joint_limit_params = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
@@ -100,8 +99,6 @@ def launch_setup(context, *args, **kwargs):
             "robot_ip:=",
             robot_ip,
             " ",
-            "cb2_controller:=",
-            cb2_controller,
         ]
     )
 
@@ -110,7 +107,6 @@ def launch_setup(context, *args, **kwargs):
     controllers_config_file = PathJoinSubstitution(
         [FindPackageShare(runtime_config_package), "config", controllers_file]
     )
-
 
     # define update rate
     update_rate_config_file = PathJoinSubstitution(
@@ -121,7 +117,6 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -130,7 +125,6 @@ def launch_setup(context, *args, **kwargs):
         parameters=[robot_description, update_rate_config_file, controllers_config_file],
         remappings=[("motion_control_handle/target_frame", "cartesian_motion_controller/target_frame")],
     )
-
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -217,8 +211,8 @@ def launch_setup(context, *args, **kwargs):
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         initial_joint_controller_spawner,
-        cartesian_motion_controller_spawner,
-        motion_control_handle_spawner,
+        # cartesian_motion_controller_spawner,
+        # motion_control_handle_spawner,
         rviz_node,
     ]
 
@@ -403,13 +397,6 @@ def generate_launch_description():
             "tool_voltage",
             default_value="24",
             description="Tool voltage that will be setup.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "cb2_controller",
-            default_value="true",
-            description="Use CB2 controller.",
         )
     )
 

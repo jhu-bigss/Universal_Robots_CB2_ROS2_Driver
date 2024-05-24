@@ -1,6 +1,6 @@
 <library path="ur_robot_driver_cb2_plugin">
-  <class name="ur_robot_driver_cb2/URPositionHardwareInterface"
-         type="ur_robot_driver_cb2::URPositionHardwareInterface"
+  <class name="ur_robot_driver/URPositionHardwareInterface"
+         type="ur_robot_driver::URPositionHardwareInterface"
          base_class_type="hardware_interface::SystemInterface">
     <description>
       ros2_control hardware interface.

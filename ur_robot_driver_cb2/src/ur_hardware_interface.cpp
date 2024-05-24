@@ -2,7 +2,7 @@
 #include <ur_robot_driver_cb2/ur_hardware_interface.h>
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 
-namespace ur_robot_driver_cb2
+namespace ur_robot_driver
 {
   
 URPositionHardwareInterface::URPositionHardwareInterface()
@@ -163,7 +163,7 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_configure(con
 
   double max_payload     = 1.0;
 
-  ur_driver_.reset(new ur_robot_driver_cb2::UrDriver(rt_msg_cond_, msg_cond_, robot_ip, reverse_port,12,0,max_payload));
+  ur_driver_.reset(new ur_robot_driver::UrDriver(rt_msg_cond_, msg_cond_, robot_ip, reverse_port,12,0,max_payload));
   ur_driver_->setJointNames(joint_names_);
   
   return CallbackReturn::SUCCESS;
@@ -348,4 +348,4 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(ur_robot_driver_cb2::URPositionHardwareInterface, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(ur_robot_driver::URPositionHardwareInterface, hardware_interface::SystemInterface)

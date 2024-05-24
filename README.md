@@ -11,101 +11,42 @@ However, you need to modify the URDF files within the package:
 ```
 colcon_cd ur_description
 
+# go to the directory
 urdf
 ├── ur_macro.xacro
 ├── ur.ros2_control.xacro
 └── ur.urdf.xacro
+
 ```
+### Modify `ur.ros2_control.xacro`
 
-### `ur.urdf.xacro`
-
-add `cb2_controller` as a xacro input parameter:
+Delete the `<sensor>` and `gpio` tages:
 
 ```xml
-    <xacro:arg name="cb2_controller" default="false"/>
-
-    <xacro:ur_robot
-      name="$(arg name)"
-      tf_prefix="$(arg tf_prefix)"
-      ...
-      cb2_controller="$(arg cb2_controller)"
-      ...
-```
-### `ur_macro.xacro`
-
-Do the same thing adding 'cb2_controller' as a xacro input parameter:
-
-```xml
-  <xacro:macro name="ur_robot" params="
-    name
+<xacro:unless value="${sim_gazebo or sim_ignition}">
+  <sensor name="${tf_prefix}tcp_fts_sensor">
     ...
-    cb2_controller:=false
+  </sensor>
+
+  <gpio name="${tf_prefix}speed_scaling">
     ...
-    <xacro:if value="${generate_ros2_control_tag}">
-      <xacro:include filename="$(find ur_description)/urdf/ur.ros2_control.xacro" />
-      <xacro:ur_ros2_control
-        name="${name}"
-        ...
-        cb2_controller="${cb2_controller}"
-        ...
-```
+  </gpio>
 
-
-### `ur.ros2_control.xacro`
-
-Same thing here adding `cb2_controller` as a xacro input parameter:
-
-```xml
-  <xacro:macro name="ur_ros2_control" params="
-    name
-    use_fake_hardware:=false fake_sensor_commands:=false
+  <gpio name="${tf_prefix}gpio">
     ...
-    cb2_controller:=false
-    ">
+    ...
+    ...
+  </gpio>
+
+</xacro:unless>
 ```
 
-change the plugin name from `ur_robot_driver` to `ur_robot_driver_cb2` as the following line:
-
-```xml
-    <plugin>ur_robot_driver_cb2/URPositionHardwareInterface</plugin>
-```
-
-add the `cb2_controller` argument to the block that contains `tcp_fts_sensor` and `gpio` interface xacro so that everything within this block will be ignored when using `cb2_controller` because they are not yet implemented:
-
-```xml
- <xacro:unless value="${sim_gazebo or sim_ignition or cb2_controller}">
- ...
-```
-so that you can use `cb2_controller` argument in your launch file to disable TCP sensor and gpio interface. Otherwise, the driver will complain that these required states/command interfaces have not been provided.
+Because current CB2 driver doesn't support TCP sensor and gpio interface yet. Without deleting the lines above in the `ur.ros2_control.xacro` file, the driver will complain that these required states/command interfaces have not been provided.
 
 ### launch file
 
-Now, you can set `cb2_controller:=true` when generating the robot description in your launch file:
+Now you can launch the driver using the provided launch file.
 
-```python
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
-            " ",
-            "name:=",
-            "ur5",
-            " ",
-            "ur_type:=",
-            "ur5",
-            " ",
-            "prefix:=",
-            "",
-            " ",
-            "robot_ip:=",
-            robot_ip,
-            " ",
-            "cb2_controller:=",
-            "true",
-        ]
-    )
-```
 ## Cartesian Motion Control
 
 Clone the [cartesian_controllers](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers) (ros2) package into your src folder and build it in release mode for faster performance. (skip the simulation and tests)
