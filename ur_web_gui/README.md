@@ -1,9 +1,11 @@
 # UR_WEB_GUI
 
-This package depends on [nicegui](https://nicegui.io/).
+This package depends on [nicegui](https://nicegui.io/) and [kdl_parser_py](https://wiki.ros.org/kdl_parser_py).
+kdl_parser_py depends on [urdf_parser_py](https://github.com/ros/urdf_parser_py/tree/ros2).
 
 ```bash
 pip3 install nicegui
+pip3 install urdf_parser_py
 ```
 
 ## Requirements

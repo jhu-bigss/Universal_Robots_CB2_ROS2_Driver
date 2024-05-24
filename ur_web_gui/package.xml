@@ -12,6 +12,8 @@
 
   <depend>python3-pykdl</depend>
   <depend>kdl_parser_py</depend>
+  <depend>urdf_parser_py</depend>
+  <depend>nicegui</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
