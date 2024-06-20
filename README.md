@@ -20,6 +20,12 @@ urdf
 ```
 ### Modify `ur.ros2_control.xacro`
 
+Change the plugin name from ur_robot_driver to ur_robot_driver_cb2 as the following line:
+
+```xml
+<plugin>ur_robot_driver_cb2/URPositionHardwareInterface</plugin>
+```
+
 Delete the `<sensor>` and `gpio` tages:
 
 ```xml
