@@ -47,9 +47,20 @@ Because current CB2 driver doesn't support TCP sensor and gpio interface yet. Wi
 
 Now you can launch the driver using the provided launch file.
 
+## `ur_web_gui` depends on `kdl_parser_py`
+
+However, the `kdl_parser_py` package is not yet available in ROS2 at this moment. There is some efforts proting it to ROS2, but it is not yet merged. So, we are using this [pull request #55](https://github.com/ros/kdl_parser/pull/55). Do the following:
+
+```bash
+cd ~/your_ros2_ws/src
+git clone https://github.com/ros/kdl_parser.git
+git fetch origin pull/55/head:pr55
+git checkout pr55
+```
+
 ## Cartesian Motion Control
 
-Clone the [cartesian_controllers](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers) (ros2) package into your src folder and build it in release mode for faster performance. (skip the simulation and tests)
+Clone the [cartesian_controllers](https://github.com/fzi-forschungszentrum-informatik/cartesian_controllers) (ros2) package into your src folder and build it in release mode for faster performance. (you may skip the simulation and tests)
 
 ```bash
 colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
