@@ -51,7 +51,7 @@ def generate_launch_description():
     base_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("ur_robot_driver_cb2"), "/launch/ur_control.launch.py"]),
         launch_arguments={
-            "ur_type": "ur5",
+            "ur_type": "ur10",
             "robot_ip": robot_ip,
             "use_fake_hardware": use_fake_hardware,
             "fake_sensor_commands": fake_sensor_commands,
