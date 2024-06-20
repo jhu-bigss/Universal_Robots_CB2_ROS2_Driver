@@ -18,7 +18,7 @@
 
 #include "ur_robot_driver_cb2/ur_driver.h"
 
-namespace ur_robot_driver
+namespace ur_robot_driver_cb2
 {
   
 UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
