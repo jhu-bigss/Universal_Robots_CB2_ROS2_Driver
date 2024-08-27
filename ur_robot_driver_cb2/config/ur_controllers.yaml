@@ -36,6 +36,15 @@ controller_manager:
       type: forward_command_controller/ForwardCommandController
 
 
+speed_scaling_state_broadcaster:
+  ros__parameters:
+    state_publish_rate: 100.0
+    tf_prefix: "$(var tf_prefix)"
+
+io_and_status_controller:
+  ros__parameters:
+    tf_prefix: "$(var tf_prefix)"
+
 forward_command_controller_velocity:
   ros__parameters:
     joints:
