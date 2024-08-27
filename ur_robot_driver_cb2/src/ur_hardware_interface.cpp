@@ -40,13 +40,45 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_init(const ha
   controllers_initialized_ = false;
   first_pass_ = true;
   initialized_ = false;
-  // system_interface_initialized_ = 0.0;
-  
-  // torque_pub_ = rclcpp::node_interfaces::get_node_base_interface().create_publisher<geometry_msgs::msg::Wrench>("wrench", 1);
 
-  //Create UrDriver;
+  max_payload_ = 1.0;
 
-  double max_payload=1;
+  // Set the following gpio variable to 0.0 for now
+  // these variables are necessary to match ur_description/urdf/ur.ros2_control.xacro
+  actual_dig_out_bits_ = {0.0};
+  actual_dig_in_bits_ = {0.0};
+  analog_io_types_ = {0.0};
+  robot_status_bits_ = {0.0};
+  safety_status_bits_ = {0.0};
+  tool_analog_input_types_ = {0.0};
+  tool_analog_input_ = {0.0};
+  standard_analog_input_ = {0.0};
+  standard_analog_output_ = {0.0};
+  tool_output_voltage_ = 0.0;
+  robot_mode_ = 0.0;
+  safety_mode_ = 0.0;
+  tool_mode_ = 0.0;
+  tool_output_current_ = 0.0;
+  tool_temperature_ = 0.0;
+  system_interface_initialized_ = 0.0;
+  robot_program_running_ = 0.0;
+
+  io_async_success_ = 0.0;
+  target_speed_fraction_cmd_ = 0.0;
+  scaling_async_success_ = 0.0;
+  resend_robot_program_cmd_ = 0.0;
+  resend_robot_program_async_success_ = 0.0;
+  hand_back_control_cmd_ = 0.0;
+  hand_back_control_async_success_ = 0.0;
+  payload_mass_ = 0.0;
+  payload_center_of_gravity_ = {0.0, 0.0, 0.0};
+  payload_async_success_ = 0.0;
+  standard_dig_out_bits_cmd_ = {0.0};
+  standard_analog_output_cmd_ = {0.0};
+  tool_voltage_cmd_ = 0.0;
+  zero_ftsensor_cmd_ = 0.0;
+  zero_ftsensor_async_success_ = 0.0;
+
   double max_acceleration=15;
   max_velocity_=10;
   acceleration_coeff_=2;
@@ -124,8 +156,9 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
         info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &urcl_joint_efforts_[i]));
   }
 
-  // state_interfaces.emplace_back(
-  //     hardware_interface::StateInterface("speed_scaling", "speed_scaling_factor", &speed_scaling_combined_));
+  const std::string tf_prefix = info_.hardware_parameters.at("tf_prefix");
+  state_interfaces.emplace_back(hardware_interface::StateInterface(tf_prefix + "speed_scaling", "speed_scaling_factor",
+                                                                   &speed_scaling_combined_));
 
   for (auto& sensor : info_.sensors) {
     for (uint j = 0; j < sensor.state_interfaces.size(); ++j) {
@@ -134,6 +167,62 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
                                                                        &urcl_ft_sensor_measurements_[j]));
     }
   }
+
+  for (size_t i = 0; i < 18; ++i) {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "digital_output_" + std::to_string(i), &actual_dig_out_bits_[i]));
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "digital_input_" + std::to_string(i), &actual_dig_in_bits_[i]));
+  }
+
+  for (size_t i = 0; i < 11; ++i) {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "safety_status_bit_" + std::to_string(i), &safety_status_bits_[i]));
+  }
+
+  for (size_t i = 0; i < 4; ++i) {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "analog_io_type_" + std::to_string(i), &analog_io_types_[i]));
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "robot_status_bit_" + std::to_string(i), &robot_status_bits_[i]));
+  }
+
+  for (size_t i = 0; i < 2; ++i) {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "tool_analog_input_type_" + std::to_string(i), &tool_analog_input_types_[i]));
+
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "tool_analog_input_" + std::to_string(i), &tool_analog_input_[i]));
+
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "standard_analog_input_" + std::to_string(i), &standard_analog_input_[i]));
+
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        tf_prefix + "gpio", "standard_analog_output_" + std::to_string(i), &standard_analog_output_[i]));
+  }
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "tool_output_voltage", &tool_output_voltage_));
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "robot_mode", &robot_mode_));
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "safety_mode", &safety_mode_));
+
+  state_interfaces.emplace_back(hardware_interface::StateInterface(tf_prefix + "gpio", "tool_mode", &tool_mode_));
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "tool_output_current", &tool_output_current_));
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "tool_temperature", &tool_temperature_));
+
+  state_interfaces.emplace_back(hardware_interface::StateInterface(tf_prefix + "system_interface", "initialized",
+                                                                   &system_interface_initialized_));
+
+  state_interfaces.emplace_back(
+      hardware_interface::StateInterface(tf_prefix + "gpio", "program_running", &robot_program_running_));
 
   return state_interfaces;
 }
@@ -149,9 +238,58 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
         info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &urcl_velocity_commands_[i]));
   }
 
-  //TODO payload
-  return command_interfaces;
+  const std::string tf_prefix = info_.hardware_parameters.at("tf_prefix");
 
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "gpio", "io_async_success", &io_async_success_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "speed_scaling", "target_speed_fraction_cmd", &target_speed_fraction_cmd_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "speed_scaling", "target_speed_fraction_async_success", &scaling_async_success_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "resend_robot_program", "resend_robot_program_cmd", &resend_robot_program_cmd_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "resend_robot_program", "resend_robot_program_async_success", &resend_robot_program_async_success_));
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "hand_back_control", "hand_back_control_cmd", &hand_back_control_cmd_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "hand_back_control", "hand_back_control_async_success", &hand_back_control_async_success_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(tf_prefix + "payload", "mass", &payload_mass_));
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "payload", "cog.x", &payload_center_of_gravity_[0]));
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "payload", "cog.y", &payload_center_of_gravity_[1]));
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "payload", "cog.z", &payload_center_of_gravity_[2]));
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "payload", "payload_async_success", &payload_async_success_));
+
+  for (size_t i = 0; i < 18; ++i) {
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
+        tf_prefix + "gpio", "standard_digital_output_cmd_" + std::to_string(i), &standard_dig_out_bits_cmd_[i]));
+  }
+
+  for (size_t i = 0; i < 2; ++i) {
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
+        tf_prefix + "gpio", "standard_analog_output_cmd_" + std::to_string(i), &standard_analog_output_cmd_[i]));
+  }
+
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "gpio", "tool_voltage_cmd", &tool_voltage_cmd_));
+
+  command_interfaces.emplace_back(
+      hardware_interface::CommandInterface(tf_prefix + "zero_ftsensor", "zero_ftsensor_cmd", &zero_ftsensor_cmd_));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      tf_prefix + "zero_ftsensor", "zero_ftsensor_async_success", &zero_ftsensor_async_success_));
+
+  return command_interfaces;
 }
 
 hardware_interface::CallbackReturn URPositionHardwareInterface::on_configure(const rclcpp_lifecycle::State& previous_state)
@@ -161,9 +299,7 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_configure(con
   std::string robot_ip   = info_.hardware_parameters["robot_ip"];
   int reverse_port       = stoi(info_.hardware_parameters["reverse_port"]);
 
-  double max_payload     = 1.0;
-
-  ur_driver_.reset(new ur_robot_driver_cb2::UrDriver(rt_msg_cond_, msg_cond_, robot_ip, reverse_port,12,0,max_payload));
+  ur_driver_.reset(new ur_robot_driver_cb2::UrDriver(rt_msg_cond_, msg_cond_, robot_ip, reverse_port,12,0, max_payload_));
   ur_driver_->setJointNames(joint_names_);
   
   return CallbackReturn::SUCCESS;

@@ -26,9 +26,8 @@
 #include <ur_robot_driver_cb2/ur_driver.h>
 
 
-// using vector6d_t = std::array<double, 6>;
-using vector6d_t = std::vector<double>;
-
+using vector6d_t = std::array<double, 6>;
+using vector3d_t = std::array<double, 3>;
 
 namespace ur_robot_driver_cb2
 {
@@ -133,7 +132,44 @@ namespace ur_robot_driver_cb2
     int servogain_;
     double lookahead_;
     int acceleration_coeff_;
+
+    double max_payload_;
     
+    // GPIO dummy variables
+    std::array<double, 18> actual_dig_out_bits_;
+    std::array<double, 18> actual_dig_in_bits_;
+    std::array<double, 11> safety_status_bits_;
+    std::array<double, 4> analog_io_types_;
+    std::array<double, 4> robot_status_bits_;
+    std::array<double, 2> tool_analog_input_types_;
+    std::array<double, 2> tool_analog_input_;
+    std::array<double, 2> standard_analog_input_;
+    std::array<double, 2> standard_analog_output_;
+    double tool_output_voltage_;
+    double robot_mode_;
+    double safety_mode_;
+    double tool_mode_;
+    double tool_output_current_;
+    double tool_temperature_;
+    double system_interface_initialized_;
+    double robot_program_running_;
+
+    double io_async_success_;
+    double target_speed_fraction_cmd_;
+    double scaling_async_success_;
+    double resend_robot_program_cmd_;
+    double resend_robot_program_async_success_;
+    double hand_back_control_cmd_;
+    double hand_back_control_async_success_;
+    double payload_mass_;
+    vector3d_t payload_center_of_gravity_;
+    double payload_async_success_;
+    std::array<double, 18> standard_dig_out_bits_cmd_;
+    std::array<double, 2> standard_analog_output_cmd_;
+    double tool_voltage_cmd_;
+    double zero_ftsensor_cmd_;
+    double zero_ftsensor_async_success_;
+
   };
 }
 
