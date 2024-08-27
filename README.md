@@ -20,34 +20,11 @@ urdf
 ```
 ### Modify `ur.ros2_control.xacro`
 
-Change the plugin name from ur_robot_driver to ur_robot_driver_cb2 as the following line:
+Change the plugin name from `ur_robot_driver` to `ur_robot_driver_cb2` as the following line:
 
 ```xml
 <plugin>ur_robot_driver_cb2/URPositionHardwareInterface</plugin>
 ```
-
-Delete the `<sensor>` and `gpio` tages:
-
-```xml
-<xacro:unless value="${sim_gazebo or sim_ignition}">
-  <sensor name="${tf_prefix}tcp_fts_sensor">
-    ...
-  </sensor>
-
-  <gpio name="${tf_prefix}speed_scaling">
-    ...
-  </gpio>
-
-  <gpio name="${tf_prefix}gpio">
-    ...
-    ...
-    ...
-  </gpio>
-
-</xacro:unless>
-```
-
-Because current CB2 driver doesn't support TCP sensor and gpio interface yet. Without deleting the lines above in the `ur.ros2_control.xacro` file, the driver will complain that these required states/command interfaces have not been provided.
 
 ### launch file
 
