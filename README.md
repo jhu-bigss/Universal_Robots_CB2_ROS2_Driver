@@ -37,3 +37,7 @@ Clone the [cartesian_controllers](https://github.com/fzi-forschungszentrum-infor
 ```bash
 colcon build --packages-skip cartesian_controller_simulation cartesian_controller_tests --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
+
+You need to uncomment the `cartesian_motion_controller_spawner` and the `motion_control_handle_spawner` under `nodes_to_start` in the [ur_control.launch.py](ur_robot_driver_cb2/launch/ur_control.launch.py) file.
+
+To switch to Cartesian motion control, you need to deactivate the `forward_position_controller` as that is the default initial_joint_controller. Then activate the `cartesian_motion_controller` and the `motion_control_handle`.
